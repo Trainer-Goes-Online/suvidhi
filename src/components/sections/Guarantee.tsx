@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion'
+import { ShieldCheck } from 'lucide-react'
 import { Container } from '@/components/ui/Container'
 import { GradientCTA } from '@/components/ui/GradientCTA'
 import { fadeUp, scaleIn, stagger, VIEWPORT_ONCE } from '@/lib/motion'
@@ -79,24 +80,38 @@ export function Guarantee() {
 
 function RefundSeal() {
   return (
-    <div className="relative w-32 h-32 sm:w-36 sm:h-36 -rotate-[8deg] select-none" aria-label="Full refund guarantee">
-      <span aria-hidden className="pulse-beacon" style={{ animationDuration: '3.2s' }} />
-      {/* outer ring */}
-      <div className="absolute inset-0 rounded-full border-[3px] border-brand-500/70" />
-      {/* inner ring */}
-      <div className="absolute inset-2.5 rounded-full border border-brand-400/50" />
-      {/* center band */}
-      <div className="absolute inset-0 flex flex-col items-center justify-center text-brand-600">
-        <span className="text-[9px] uppercase tracking-[0.3em] font-semibold opacity-70">
-          14-Day
-        </span>
-        <span className="my-1 px-3 py-1 rounded-md bg-brand-600 text-white font-display text-base sm:text-lg font-bold tracking-wide shadow-soft -rotate-2">
-          FULL REFUND
-        </span>
-        <span className="text-[9px] uppercase tracking-[0.3em] font-semibold opacity-70">
-          Guaranteed
-        </span>
+    <div
+      className="flex flex-col items-center gap-3 select-none"
+      aria-label="14-day full money-back guarantee"
+    >
+      <div className="relative grid place-items-center w-28 h-28 sm:w-32 sm:h-32">
+        {/* soft neon halo */}
+        <span aria-hidden className="absolute inset-2 rounded-full bg-brand-300/40 blur-xl" />
+        {/* rotating dashed ring */}
+        <motion.span
+          aria-hidden
+          animate={{ rotate: 360 }}
+          transition={{ duration: 20, ease: 'linear', repeat: Infinity }}
+          className="absolute inset-0 rounded-full border-[3px] border-dashed border-brand-300/70"
+        />
+        {/* static inner ring */}
+        <span aria-hidden className="absolute inset-3 rounded-full border border-brand-200/70" />
+        {/* glossy brand core — icon only */}
+        <div
+          className="relative grid place-items-center w-[5.25rem] h-[5.25rem] sm:w-[6rem] sm:h-[6rem] rounded-full text-white"
+          style={{
+            background: 'linear-gradient(160deg, #de6976 0%, #CB4A5D 52%, #963543 100%)',
+            boxShadow:
+              'inset 0 2px 3px rgba(255,255,255,.45), inset 0 -4px 8px rgba(57,18,24,.35), 0 12px 26px -8px rgba(203,74,93,.6)',
+          }}
+        >
+          <ShieldCheck className="w-9 h-9 sm:w-10 sm:h-10 drop-shadow" strokeWidth={2} />
+        </div>
       </div>
+      {/* label below the seal */}
+      <span className="text-[12px] sm:text-[13px] font-bold uppercase tracking-[0.16em] text-brand-700">
+        14-Day Money-Back Guarantee
+      </span>
     </div>
   )
 }

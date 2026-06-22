@@ -4,7 +4,7 @@ import { Container } from '@/components/ui/Container'
 import { SectionHeading } from '@/components/ui/SectionHeading'
 import { PrimaryCTA } from '@/components/ui/PrimaryCTA'
 import { Countdown } from '@/components/ui/Countdown'
-import { Placeholder } from '@/components/ui/Placeholder'
+import Image from 'next/image'
 import { fadeUp, stagger, VIEWPORT_ONCE } from '@/lib/motion'
 import { OFFER, VALUE_STACK, VALUE_STACK_TOTAL } from '@/lib/config'
 import { formatINR } from '@/lib/utils'
@@ -32,13 +32,16 @@ export function ValueStack() {
           className="mt-12 sm:mt-14 relative rounded-[28px] overflow-hidden border border-ink-100 shadow-elev bg-white"
         >
           <div className="p-6 sm:p-8 lg:p-10">
-            {/* Everything-you-get collage placeholder */}
-            <Placeholder
-              ratio="aspect-[16/7]"
-              label="Everything you get · product collage"
-              rounded="rounded-2xl"
-              className="mb-7"
-            />
+            {/* Everything-you-get product collage */}
+            <div className="relative mb-7 w-full aspect-[16/7] rounded-2xl overflow-hidden bg-cream-dark">
+              <Image
+                src="/Value_Stack_Collage/Value_Stack_Collage1.1.png"
+                alt="Everything you get — the assessment, 4 clinical audits and 3 bonuses"
+                fill
+                sizes="(max-width: 1024px) 100vw, 800px"
+                className="object-cover"
+              />
+            </div>
 
             {/* Itemised list */}
             <motion.ul
@@ -112,7 +115,7 @@ export function ValueStack() {
                   'radial-gradient(60% 60% at 30% 0%, rgba(236,158,169,.45) 0%, transparent 60%), radial-gradient(40% 40% at 100% 100%, rgba(255,202,74,.2) 0%, transparent 60%)',
               }}
             />
-            <div className="relative p-6 sm:p-8 lg:p-10 text-cream grid sm:grid-cols-[1.1fr_1fr] gap-6 sm:gap-8 items-center">
+            <div className="relative p-6 sm:p-8 lg:p-10 text-cream grid grid-cols-1 sm:grid-cols-[1.1fr_1fr] gap-6 sm:gap-8 items-center">
               <div className="text-center sm:text-left">
                 <div className="text-[11px] uppercase tracking-[0.22em] font-semibold text-brand-200">
                   Get everything today for
@@ -134,8 +137,8 @@ export function ValueStack() {
                 </p>
               </div>
 
-              <div className="w-full space-y-4">
-                <div className="rounded-2xl bg-white/8 border border-white/12 backdrop-blur-md p-4">
+              <div className="w-full min-w-0 space-y-4">
+                <div className="min-w-0">
                   <div className="flex items-center justify-center gap-2 text-[11px] uppercase tracking-[0.2em] font-semibold text-cream/65 mb-3">
                     <Clock className="w-3.5 h-3.5 text-brand-300" /> Offer expires in
                   </div>

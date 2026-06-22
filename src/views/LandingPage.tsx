@@ -24,17 +24,30 @@ export default function LandingPage() {
   // guarantee → clinician → FAQ. Pink brand theme + our type hierarchy.
   return (
     <div className="relative">
+      {/* Alternating dark/light rhythm — `.band-dark` (see index.css) gives a
+          section a deep brand background with inverted loose-text, while white
+          cards keep their normal dark text so contrast stays safe. */}
       <main className="relative">
         <Hero />
-        <SoundLikeYou />
+        <div className="band-dark">
+          <SoundLikeYou />
+        </div>
         <RecoveryCycle />
-        <Modules />
+        <div className="band-dark">
+          <Modules />
+        </div>
         <Testimonials />
-        <ClarityCall />
+        <div className="band-dark">
+          <ClarityCall />
+        </div>
         <ValueStack />
-        <Guarantee />
+        <div className="band-dark">
+          <Guarantee />
+        </div>
         <Clinician />
-        <FAQ />
+        <div className="band-dark">
+          <FAQ />
+        </div>
       </main>
       <Footer />
       <StickyCTA />

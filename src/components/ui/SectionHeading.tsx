@@ -13,7 +13,6 @@ interface SectionHeadingProps {
 }
 
 export function SectionHeading({
-  eyebrow,
   title,
   subtitle,
   align = 'center',
@@ -32,12 +31,7 @@ export function SectionHeading({
         className,
       )}
     >
-      {eyebrow && (
-        <div className="eyebrow">
-          <span className="w-1.5 h-1.5 rounded-full bg-brand-500 animate-breathe" aria-hidden />
-          {eyebrow}
-        </div>
-      )}
+      {/* Eyebrow labels above section headings removed per design direction. */}
       <h2
         className={cn(
           'h-section text-balance',

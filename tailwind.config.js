@@ -49,8 +49,8 @@ export default {
         },
       },
       fontFamily: {
-        display: ['"Poppins"', 'ui-sans-serif', 'system-ui', 'sans-serif'],
-        sans: ['"Inter"', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+        display: ['"Sora"', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+        sans: ['"Inter Tight"', 'ui-sans-serif', 'system-ui', 'sans-serif'],
         script: ['"Pacifico"', 'cursive'],
       },
       borderRadius: {

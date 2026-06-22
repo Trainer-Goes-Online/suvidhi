@@ -19,6 +19,10 @@
   html {
     -webkit-text-size-adjust: 100%;
     scroll-behavior: smooth;
+    /* Prevent any phantom horizontal scroll from decorative blurs. `clip`
+       (unlike `hidden`) does NOT create a scroll container, so it keeps
+       position:sticky (e.g. the Modules stack) resolving against the viewport. */
+    overflow-x: clip;
   }
 
   body {
@@ -63,12 +67,12 @@
   }
 
   h1, h2, h3, h4 {
-    font-family: 'Poppins', sans-serif;
-    letter-spacing: -0.02em;
+    font-family: 'Sora', ui-sans-serif, system-ui, sans-serif;
+    letter-spacing: -0.025em;
   }
 
   body, p, button, input, textarea, select, label, li, span, a {
-    font-family: 'Inter', sans-serif;
+    font-family: 'Inter Tight', 'Inter', ui-sans-serif, system-ui, sans-serif;
   }
 }
 
@@ -122,12 +126,29 @@
     @apply backdrop-blur-xl border border-white/10 text-white;
   }
 
+  /* Glassmorphism card — frosted surface with a theme-tinted border. Works on
+     both light sections and the dark bands (the blur picks up whatever sits
+     behind it). */
   .card {
-    @apply rounded-3xl bg-white border border-ink-100 shadow-soft transition-all duration-500 ease-out-expo;
+    @apply rounded-3xl border transition-all duration-500 ease-out-expo;
+    background: rgba(255, 255, 255, 0.72);
+    -webkit-backdrop-filter: blur(16px) saturate(140%);
+    backdrop-filter: blur(16px) saturate(140%);
+    border-color: rgba(203, 74, 93, 0.16);
+    box-shadow:
+      0 1px 2px rgba(57, 18, 24, 0.04),
+      0 10px 30px -14px rgba(57, 18, 24, 0.12),
+      inset 0 1px 0 rgba(255, 255, 255, 0.6);
   }
 
   .card-hover {
-    @apply hover:-translate-y-1 hover:shadow-elev hover:border-brand-200;
+    @apply hover:-translate-y-1;
+  }
+  .card-hover:hover {
+    border-color: rgba(203, 74, 93, 0.4);
+    box-shadow:
+      0 18px 44px -18px rgba(203, 74, 93, 0.34),
+      inset 0 1px 0 rgba(255, 255, 255, 0.7);
   }
 
   /* Eyebrow label */
@@ -139,13 +160,13 @@
 
   /* Section heading */
   .h-display {
-    @apply font-display text-4xl sm:text-5xl lg:text-[3.5rem] leading-[1.05] font-semibold text-ink-950;
+    @apply font-display text-4xl sm:text-5xl lg:text-[3.5rem] leading-[1.05] font-bold text-ink-950;
     letter-spacing: -0.03em;
   }
 
   .h-section {
-    @apply font-display text-3xl sm:text-4xl lg:text-5xl leading-[1.08] font-semibold text-ink-950;
-    letter-spacing: -0.025em;
+    @apply font-display text-3xl sm:text-4xl lg:text-5xl leading-[1.08] font-bold text-ink-950;
+    letter-spacing: -0.028em;
   }
 
   .h-sub {
@@ -153,16 +174,47 @@
     letter-spacing: -0.02em;
   }
 
-  /* Icon container — consistent style */
+  /* Icon container — 3D glossy brand tile with depth + hover pop. */
   .icon-tile {
-    @apply inline-flex items-center justify-center w-11 h-11 rounded-2xl
-           bg-gradient-to-br from-brand-50 to-brand-100/60
-           text-brand-700 border border-brand-200/60
+    @apply relative overflow-hidden inline-flex items-center justify-center w-11 h-11 rounded-2xl
+           text-brand-700 border border-brand-200/70
            transition-all duration-500 ease-out-expo;
   }
 
   .icon-tile-lg {
     @apply icon-tile w-14 h-14 rounded-[1.25rem];
+  }
+
+  /* shared 3D surface for both sizes (plain CSS so it isn't lost by @apply) */
+  .icon-tile,
+  .icon-tile-lg {
+    background: linear-gradient(160deg, #ffffff 0%, #fbe7ea 52%, #f5c8ce 100%);
+    box-shadow:
+      inset 0 1.5px 1px rgba(255, 255, 255, 0.9),
+      inset 0 -3px 6px rgba(203, 74, 93, 0.12),
+      0 6px 14px -6px rgba(203, 74, 93, 0.32);
+  }
+  .icon-tile::after,
+  .icon-tile-lg::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    height: 48%;
+    border-radius: inherit;
+    background: linear-gradient(to bottom, rgba(255, 255, 255, 0.55), transparent);
+    pointer-events: none;
+  }
+  .group:hover .icon-tile,
+  .group:hover .icon-tile-lg,
+  .icon-tile:hover,
+  .icon-tile-lg:hover {
+    transform: translateY(-2px) scale(1.06);
+    color: #963543;
+    box-shadow:
+      inset 0 1.5px 1px rgba(255, 255, 255, 0.92),
+      0 14px 24px -8px rgba(203, 74, 93, 0.5);
   }
 
   .icon-tile-dark {
@@ -381,4 +433,134 @@
   .marquee-track {
     animation: marquee 38s linear infinite !important;
   }
+}
+
+/* ──────────────────────────────────────────────────────────────────
+   Alternating section backgrounds — DARK band.
+   Wrap a section in `.band-dark` to give it a deep brand background with
+   light "loose" text, while white cards / brand-50 surfaces that sit on the
+   band keep their normal dark text (they pop nicely on the dark). Rules are
+   un-layered + higher specificity so they override Tailwind text utilities,
+   and the card-restore rules out-specify the band-invert rules.
+   ────────────────────────────────────────────────────────────────── */
+.band-dark {
+  position: relative;
+  isolation: isolate;
+  color: rgba(253, 250, 248, 0.84);
+  /* Deep version of the primary brand (#CB4A5D) — rich wine/rose, not brown. */
+  background:
+    radial-gradient(78% 56% at 50% 0%, rgba(236, 158, 169, 0.18) 0%, transparent 62%),
+    radial-gradient(50% 40% at 85% 100%, rgba(203, 74, 93, 0.16) 0%, transparent 60%),
+    linear-gradient(168deg, #5d2129 0%, #44151d 52%, #2c0e14 100%);
+}
+
+/* invert loose text directly on the band */
+.band-dark .h-display,
+.band-dark .h-section,
+.band-dark .h-sub,
+.band-dark .text-ink-950,
+.band-dark .text-ink-900 { color: #ffffff; }
+.band-dark .text-ink-800,
+.band-dark .text-ink-700,
+.band-dark .text-ink-600 { color: rgba(253, 250, 248, 0.80); }
+.band-dark .text-ink-500,
+.band-dark .text-ink-400 { color: rgba(253, 250, 248, 0.58); }
+.band-dark .grad-text {
+  background: linear-gradient(95deg, #ffffff 0%, #f5c8ce 55%, #ec9ea9 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.band-dark .border-ink-100,
+.band-dark .border-ink-200 { border-color: rgba(255, 255, 255, 0.12); }
+
+/* restore dark text inside opaque light surfaces resting on the band */
+.band-dark .bg-white .h-display, .band-dark .card .h-display, .band-dark .bg-brand-50 .h-display,
+.band-dark .bg-white .h-section, .band-dark .card .h-section, .band-dark .bg-brand-50 .h-section,
+.band-dark .bg-white .h-sub, .band-dark .card .h-sub, .band-dark .bg-brand-50 .h-sub,
+.band-dark .bg-white .text-ink-950, .band-dark .card .text-ink-950, .band-dark .bg-brand-50 .text-ink-950,
+.band-dark .bg-white .text-ink-900, .band-dark .card .text-ink-900, .band-dark .bg-brand-50 .text-ink-900 { color: #211e1e; }
+.band-dark .bg-white .text-ink-800, .band-dark .card .text-ink-800, .band-dark .bg-brand-50 .text-ink-800,
+.band-dark .bg-white .text-ink-700, .band-dark .card .text-ink-700, .band-dark .bg-brand-50 .text-ink-700,
+.band-dark .bg-white .text-ink-600, .band-dark .card .text-ink-600, .band-dark .bg-brand-50 .text-ink-600 { color: #4e4747; }
+.band-dark .bg-white .text-ink-500, .band-dark .card .text-ink-500, .band-dark .bg-brand-50 .text-ink-500,
+.band-dark .bg-white .text-ink-400, .band-dark .card .text-ink-400, .band-dark .bg-brand-50 .text-ink-400 { color: #766c6c; }
+.band-dark .bg-white .grad-text, .band-dark .card .grad-text, .band-dark .bg-brand-50 .grad-text {
+  background: linear-gradient(95deg, #5d2129 0%, #963543 40%, #CB4A5D 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* ════════════════════════════════════════════════════════════════
+   MODERN VISUAL SYSTEM — vibrant brand gradients, neon glow, glass.
+   Appended last so it wins over the base component definitions.
+   ════════════════════════════════════════════════════════════════ */
+
+/* Vibrant brand gradient text (rose → coral) */
+.grad-text {
+  background: linear-gradient(100deg, #8f2e3e 0%, #cb4a5d 42%, #e06c7c 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+/* Extra-vivid accent gradient (rose → coral → warm amber) */
+.grad-text-vivid {
+  background: linear-gradient(100deg, #cb4a5d 0%, #de6976 45%, #f98e07 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Neon-glow primary CTAs (animated gradient + glow on hover) */
+.btn-primary,
+.btn-primary-xl {
+  background-image: linear-gradient(100deg, #cb4a5d 0%, #de6976 55%, #cb4a5d 100%);
+  background-size: 180% 100%;
+  box-shadow:
+    0 10px 28px -10px rgba(203, 74, 93, 0.55),
+    inset 0 1px 0 rgba(255, 255, 255, 0.28);
+}
+.btn-primary:hover,
+.btn-primary-xl:hover {
+  background-position: 100% 0;
+  box-shadow:
+    0 16px 42px -10px rgba(203, 74, 93, 0.7),
+    0 0 28px -6px rgba(222, 105, 118, 0.65),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+}
+
+/* Glass cards: brand-tinted border + neon hover glow */
+.card-hover:hover {
+  border-color: rgba(222, 105, 118, 0.55);
+  box-shadow:
+    0 20px 50px -20px rgba(203, 74, 93, 0.4),
+    0 0 24px -8px rgba(222, 105, 118, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.7);
+}
+
+/* Dark band: neon top hairline + glowing headings + light gradient text */
+.band-dark::before {
+  content: '';
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(236, 158, 169, 0.55), transparent);
+  pointer-events: none;
+  z-index: 1;
+}
+.band-dark .h-section,
+.band-dark .h-display {
+  text-shadow: 0 0 26px rgba(236, 158, 169, 0.28);
+}
+.band-dark .grad-text {
+  background: linear-gradient(100deg, #ffffff 0%, #f5c8ce 55%, #ec9ea9 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Soft neon glow utility */
+.glow-brand {
+  box-shadow: 0 0 0 1px rgba(203, 74, 93, 0.2), 0 0 30px -6px rgba(222, 105, 118, 0.45);
 }

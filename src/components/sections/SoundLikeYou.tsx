@@ -1,46 +1,21 @@
 import { motion } from 'framer-motion'
-import {
-  Battery,
-  Brain,
-  Coffee,
-  FileSearch,
-  Frown,
-  Scissors,
-  Sparkles,
-  Waves,
-} from 'lucide-react'
 import { Container } from '@/components/ui/Container'
 import { SectionHeading } from '@/components/ui/SectionHeading'
 import { PrimaryCTA } from '@/components/ui/PrimaryCTA'
+import { Placeholder } from '@/components/ui/Placeholder'
 import { fadeUp, stagger, VIEWPORT_ONCE } from '@/lib/motion'
 
+// One image slot per sign (serial order). Placeholders for now — the manager
+// will drop the final illustrations into these slots on his end.
 const signs = [
-  {
-    icon: Battery,
-    text: "You're 3, 6, 12 or even 24 months postpartum and still feel exhausted.",
-  },
-  { icon: Scissors, text: 'Your hair is still shedding more than it should.' },
-  {
-    icon: FileSearch,
-    text: 'Your doctor says your reports are "normal", but you don\'t feel normal.',
-  },
-  { icon: Brain, text: "You're struggling with brain fog and poor focus." },
-  {
-    icon: Coffee,
-    text: 'You hit a wall every afternoon and rely on caffeine to get through the day.',
-  },
-  {
-    icon: Waves,
-    text: "You've tried supplements, diets and advice online, but nothing seems to create lasting change.",
-  },
-  {
-    icon: Sparkles,
-    text: "The weight came off in some places but the stubborn post-baby pouch hasn't budged.",
-  },
-  {
-    icon: Frown,
-    text: 'Your mood feels flat, disconnected or unlike the person you used to be.',
-  },
+  "You're 3, 6, 12 or even 24 months postpartum and still feel exhausted.",
+  'Your hair is still shedding more than it should.',
+  'Your doctor says your reports are "normal", but you don\'t feel normal.',
+  "You're struggling with brain fog and poor focus.",
+  'You hit a wall every afternoon and rely on caffeine to get through the day.',
+  "You've tried supplements, diets and advice online, but nothing seems to create lasting change.",
+  "The weight came off in some places but the stubborn post-baby pouch hasn't budged.",
+  'Your mood feels flat, disconnected or unlike the person you used to be.',
 ]
 
 export function SoundLikeYou() {
@@ -48,13 +23,22 @@ export function SoundLikeYou() {
     <section className="relative section-pad">
       <Container>
         <SectionHeading
-          eyebrow="An honest gut-check"
           title={
             <>
               Does this <span className="grad-text">sound like you?</span>
             </>
           }
-          subtitle="If you nod along to even a few of these, you're not imagining it, and you're not alone. This is exactly the pattern The Postpartum Restore was built to decode."
+          subtitle={
+            <>
+              If you nod along to even a few of these, you&apos;re not imagining
+              it — and{' '}
+              <span className="font-semibold text-brand-700">
+                you&apos;re not alone
+              </span>
+              . This is exactly the pattern The Postpartum Restore was built to
+              decode.
+            </>
+          }
         />
 
         <motion.ul
@@ -62,27 +46,28 @@ export function SoundLikeYou() {
           initial="hidden"
           whileInView="show"
           viewport={VIEWPORT_ONCE}
-          className="mt-12 sm:mt-14 grid sm:grid-cols-2 gap-4 sm:gap-5"
+          className="mt-12 sm:mt-14 grid grid-cols-2 lg:grid-cols-4 gap-x-4 gap-y-7 sm:gap-x-5 sm:gap-y-8"
         >
-          {signs.map((s) => {
-            const Icon = s.icon
-            return (
-              <motion.li
-                key={s.text}
-                variants={fadeUp}
-                whileHover={{ y: -3 }}
-                transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-                className="group relative flex items-start gap-4 rounded-2xl bg-white border border-ink-100 shadow-soft p-5 sm:p-6 hover:border-brand-200 hover:shadow-elev transition-all duration-500"
-              >
-                <span className="icon-tile shrink-0 group-hover:scale-110 group-hover:shadow-ring transition-all duration-500">
-                  <Icon className="w-5 h-5" strokeWidth={1.75} />
-                </span>
-                <p className="text-ink-800 text-[15px] sm:text-[15.5px] leading-relaxed text-pretty pt-1">
-                  {s.text}
-                </p>
-              </motion.li>
-            )
-          })}
+          {signs.map((text) => (
+            <motion.li
+              key={text}
+              variants={fadeUp}
+              whileHover={{ y: -5 }}
+              transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+              className="group flex flex-col items-center text-center"
+            >
+              {/* Image slot — manager will add the illustration here. */}
+              <Placeholder
+                ratio="aspect-square"
+                rounded="rounded-[22px]"
+                label="Image"
+                className="shadow-[0_12px_28px_-14px_rgba(0,0,0,0.55)] transition-transform duration-500 ease-out group-hover:-translate-y-1"
+              />
+              <p className="mt-3.5 px-1 text-ink-900 font-semibold text-[12.5px] sm:text-[13.5px] leading-snug text-pretty">
+                {text}
+              </p>
+            </motion.li>
+          ))}
         </motion.ul>
 
         <motion.div

@@ -57,14 +57,14 @@ function TimeBlock({ value, label, dark }: { value: string; label: string; dark?
     <div className="flex flex-col items-center">
       <div
         className={cn(
-          'relative w-14 sm:w-[60px] h-14 sm:h-[60px] rounded-2xl overflow-hidden',
-          'flex items-center justify-center font-semibold tabular-nums',
+          'relative w-12 sm:w-[58px] h-12 sm:h-[58px] rounded-2xl overflow-hidden',
+          'flex items-center justify-center font-bold tabular-nums',
           dark
-            ? 'bg-white/10 text-white border border-white/15 shadow-inner backdrop-blur-sm'
-            : 'bg-gradient-to-b from-ink-900 to-ink-950 text-cream shadow-elev',
+            ? 'text-white border border-white/25 backdrop-blur-md [background:linear-gradient(180deg,rgba(255,255,255,0.2),rgba(255,255,255,0.04))] shadow-[inset_0_1.5px_1px_rgba(255,255,255,0.4),inset_0_-5px_9px_rgba(0,0,0,0.4),0_9px_20px_-6px_rgba(0,0,0,0.55)]'
+            : 'text-cream [background:linear-gradient(180deg,#3a2329,#211e1e_60%,#110f0f)] shadow-[inset_0_1.5px_1px_rgba(255,255,255,0.18),0_10px_22px_-8px_rgba(57,18,24,0.6)] border border-white/10',
         )}
       >
-        <span className="absolute inset-x-0 top-0 h-px bg-white/20" />
+        <span className="absolute inset-x-0 top-0 h-1/2 bg-gradient-to-b from-white/20 to-transparent" />
         <AnimatePresence mode="popLayout" initial={false}>
           <motion.span
             key={value}

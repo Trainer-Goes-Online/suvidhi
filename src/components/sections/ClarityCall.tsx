@@ -2,7 +2,7 @@ import { motion } from 'framer-motion'
 import { CheckCircle2, Gift, Sparkles } from 'lucide-react'
 import { Container } from '@/components/ui/Container'
 import { SectionHeading } from '@/components/ui/SectionHeading'
-import { Placeholder } from '@/components/ui/Placeholder'
+import Image from 'next/image'
 import { fadeUp, stagger, VIEWPORT_ONCE } from '@/lib/motion'
 import { VALUE_STACK } from '@/lib/config'
 import { formatINR } from '@/lib/utils'
@@ -12,22 +12,27 @@ const coreItems = [
   {
     title: 'The Postpartum Restore Guided Assessment',
     desc: "A 25-minute guided recovery experience that helps you identify what's really holding your recovery back, connect the dots between your symptoms, and uncover the specific factors affecting your energy, hair, mood and recovery.",
+    image: '/Value_and_Bonuses/Product_Mockup_Assesement.png',
   },
   {
     title: 'The Postpartum Depletion Audit',
     desc: 'Review your blood markers against postpartum-focused ranges and discover whether hidden nutrient deficiencies may be contributing to fatigue, hair loss, brain fog and slow recovery.',
+    image: '/Value_and_Bonuses/Product_Mockup_Audit1.png',
   },
   {
     title: 'The Metabolic Recovery Audit',
     desc: 'Identify the eating patterns, energy crashes and recovery gaps that may be keeping your body stuck in storage mode instead of repair mode.',
+    image: '/Value_and_Bonuses/Product_Mockup_Audit2.png',
   },
   {
     title: 'The Supplement & Hair Recovery Audit',
     desc: 'Discover whether your current supplements are actually supporting your recovery and uncover the hidden connections between nutrient status, thyroid health and postpartum hair loss.',
+    image: '/Value_and_Bonuses/Product_Mockup_Audit3.png',
   },
   {
     title: 'The Neuro-Endocrine Reset Audit',
     desc: 'Evaluate the lifestyle, stress and environmental factors that may be quietly affecting your hormones, energy, mood and overall recovery.',
+    image: '/Value_and_Bonuses/Product_Mockup_Audit4.png',
   },
 ]
 
@@ -35,14 +40,17 @@ const bonusItems = [
   {
     title: '30-Minute Postpartum Assessment Call With Suvidhi',
     desc: 'Get personalised guidance on your assessment results, clarity on your biggest recovery bottlenecks, and expert direction on the next best steps for your body.',
+    image: '/Value_and_Bonuses/Bonus1.png',
   },
   {
     title: 'Private Postpartum Mothers Community',
     desc: 'Join a supportive community of mothers navigating similar challenges, sharing wins, asking questions and supporting one another throughout their recovery journey.',
+    image: '/Value_and_Bonuses/Bonus2.png',
   },
   {
     title: 'Monthly Group Coaching Sessions',
     desc: "Join live coaching sessions with Suvidhi where you'll get ongoing education, answers to your questions and deeper support as you continue implementing your recovery plan.",
+    image: '/Value_and_Bonuses/Bonus3.png',
   },
 ]
 
@@ -77,11 +85,15 @@ export function ClarityCall() {
               transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
               className="group relative w-full md:w-[calc(50%-0.75rem)] card card-hover p-4 sm:p-5 overflow-hidden flex flex-col"
             >
-              <Placeholder
-                ratio="aspect-[16/10]"
-                label="Product mockup"
-                rounded="rounded-xl"
-              />
+              <div className="relative w-full aspect-square rounded-xl overflow-hidden bg-cream-dark">
+                <Image
+                  src={it.image}
+                  alt={it.title}
+                  fill
+                  sizes="(max-width: 768px) 100vw, 380px"
+                  className="object-cover"
+                />
+              </div>
               <div className="mt-4 flex items-start justify-between gap-3">
                 <h3 className="font-display text-[1.05rem] sm:text-[1.15rem] font-semibold text-ink-950 leading-tight">
                   {it.title}
@@ -129,11 +141,15 @@ export function ClarityCall() {
               transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
               className="group relative w-full md:w-[calc(50%-0.75rem)] card card-hover p-4 sm:p-5 overflow-hidden flex flex-col"
             >
-              <Placeholder
-                ratio="aspect-[16/10]"
-                label="Bonus mockup"
-                rounded="rounded-xl"
-              />
+              <div className="relative w-full aspect-square rounded-xl overflow-hidden bg-cream-dark">
+                <Image
+                  src={it.image}
+                  alt={it.title}
+                  fill
+                  sizes="(max-width: 768px) 100vw, 380px"
+                  className="object-cover"
+                />
+              </div>
               <div className="mt-4 flex items-start justify-between gap-3">
                 <h3 className="font-display text-[1.02rem] font-semibold text-ink-950 leading-tight">
                   {it.title}

@@ -33,9 +33,9 @@ export const BRAND = {
 } as const
 
 export const OFFER = {
-  name: str(process.env.NEXT_PUBLIC_OFFER_NAME, '1:1 Clarity Call'),
-  price: num(process.env.NEXT_PUBLIC_OFFER_PRICE_INR, 1),
-  fullPrice: num(process.env.NEXT_PUBLIC_OFFER_FULL_PRICE_INR, 4996),
+  name: str(process.env.NEXT_PUBLIC_OFFER_NAME, 'The Postpartum Restore'),
+  price: num(process.env.NEXT_PUBLIC_OFFER_PRICE_INR, 497),
+  fullPrice: num(process.env.NEXT_PUBLIC_OFFER_FULL_PRICE_INR, 21000),
   currency: str(process.env.NEXT_PUBLIC_OFFER_CURRENCY, 'INR'),
   // For UI display — formatted with Indian numbering
   get priceLabel(): string {

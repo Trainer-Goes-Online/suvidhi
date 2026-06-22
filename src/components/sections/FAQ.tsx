@@ -37,11 +37,14 @@ export function FAQ() {
   const [open, setOpen] = useState<number | null>(0)
 
   return (
-    <section id="faq" className="relative section-pad">
+    <section id="faq" className="relative pt-10 pb-7 sm:pt-12 sm:pb-9 lg:pt-16">
       <Container size="narrow">
         <SectionHeading
-          eyebrow="Before you book · Quick answers"
-          title="Frequently Asked Questions"
+          title={
+            <>
+              Frequently <span className="grad-text">Asked Questions</span>
+            </>
+          }
         />
 
         <motion.div
@@ -49,7 +52,7 @@ export function FAQ() {
           initial="hidden"
           whileInView="show"
           viewport={VIEWPORT_ONCE}
-          className="mt-12 sm:mt-14 space-y-3"
+          className="mt-8 sm:mt-10 space-y-3"
         >
           {faqs.map((f, i) => {
             const isOpen = open === i
@@ -70,7 +73,7 @@ export function FAQ() {
                   aria-expanded={isOpen}
                   className="w-full text-left px-5 sm:px-6 py-5 flex items-center gap-4 focus:outline-none focus-visible:ring-4 focus-visible:ring-brand-500/15 rounded-2xl"
                 >
-                  <span className="flex-1 font-display text-[1.1rem] sm:text-[1.2rem] font-semibold text-ink-950 leading-snug">
+                  <span className="flex-1 text-[1rem] sm:text-[1.08rem] font-medium text-ink-900 leading-snug">
                     {f.q}
                   </span>
                   <span
