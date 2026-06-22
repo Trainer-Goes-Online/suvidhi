@@ -83,7 +83,7 @@ export function ClarityCall() {
               variants={fadeUp}
               whileHover={{ y: -4 }}
               transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-              className="group relative w-full md:w-[calc(50%-0.75rem)] card card-hover p-4 sm:p-5 overflow-hidden flex flex-col"
+              className="group relative w-full md:w-[calc(50%-0.75rem)] rounded-[22px] border border-brand-200/30 bg-white shadow-elev p-4 sm:p-5 overflow-hidden flex flex-col"
             >
               <div className="relative w-full aspect-square rounded-xl overflow-hidden bg-cream-dark">
                 <Image
@@ -139,7 +139,7 @@ export function ClarityCall() {
               variants={fadeUp}
               whileHover={{ y: -4 }}
               transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-              className="group relative w-full md:w-[calc(50%-0.75rem)] card card-hover p-4 sm:p-5 overflow-hidden flex flex-col"
+              className="group relative w-full md:w-[calc(50%-0.75rem)] rounded-[22px] border border-brand-200/30 bg-white shadow-elev p-4 sm:p-5 overflow-hidden flex flex-col"
             >
               <div className="relative w-full aspect-square rounded-xl overflow-hidden bg-cream-dark">
                 <Image
