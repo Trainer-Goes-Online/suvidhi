@@ -11,6 +11,7 @@ import { Clinician } from '@/components/sections/Clinician'
 import { FAQ } from '@/components/sections/FAQ'
 import { Footer } from '@/components/sections/Footer'
 import { StickyCTA } from '@/components/sections/StickyCTA'
+import { TopMarquee } from '@/components/sections/TopMarquee'
 
 export default function LandingPage() {
   useEffect(() => {
@@ -24,6 +25,9 @@ export default function LandingPage() {
   // guarantee → clinician → FAQ. Pink brand theme + our type hierarchy.
   return (
     <div className="relative">
+      {/* Scrolling trust marquee — same as the checkout / book-a-call / thank-you
+          pages, so the landing page opens with it too. */}
+      <TopMarquee />
       {/* Alternating dark/light rhythm — `.band-dark` (see index.css) gives a
           section a deep brand background with inverted loose-text, while white
           cards keep their normal dark text so contrast stays safe. */}
