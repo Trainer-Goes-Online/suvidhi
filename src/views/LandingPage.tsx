@@ -26,11 +26,10 @@ export default function LandingPage() {
     document.title = 'Suvidhi — The Postpartum Restore™ · Find Out Why You Haven\'t Recovered'
   }, [])
 
-  // Section order: hero w/ product mockup → launch-offer box → "does this sound
-  // like you" → testimonials ("real mothers, real recoveries") → the cycle +
-  // consequences ("left unaddressed, this leads to") → 5 modules (stacking
-  // cards) → strategic clarity call → what's included → guarantee → clinician →
-  // FAQ. Pink brand theme + our type hierarchy.
+  // Section order: hero → "does this sound like you" → testimonials slider →
+  // the cycle + consequences ("Left unaddressed…") → 5 modules (stacking cards)
+  // → what's included → value-stack recap → guarantee → clinician → FAQ.
+  // band-dark alternates every other section so the dark/light rhythm holds.
   return (
     <div className="relative">
       {/* Scrolling trust marquee — same as the checkout / book-a-call / thank-you
@@ -38,15 +37,16 @@ export default function LandingPage() {
       <TopMarquee />
       {/* Alternating dark/light rhythm — `.band-dark` (see index.css) gives a
           section a deep brand background with inverted loose-text, while white
-          cards keep their normal dark text so contrast stays safe. With
-          Testimonials moved up under SoundLikeYou, the bands downstream flip so
-          the rhythm stays strictly dark→light→dark (RecoveryCycle is now dark,
-          Modules now light). */}
+          cards keep their normal dark text so contrast stays safe. */}
       <main className="relative">
         <Hero />
         <div className="band-dark">
           <SoundLikeYou />
         </div>
+        {/* Testimonials moved up to sit directly under "Does this sound like
+            you?". The rest of the order is unchanged (RecoveryCycle onward).
+            band-dark flips on RecoveryCycle + Modules so the dark/light rhythm
+            keeps strictly alternating after the move. */}
         <Testimonials />
         <div className="band-dark">
           <RecoveryCycle />
