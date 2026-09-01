@@ -25,6 +25,10 @@ function bool(value: string | undefined, fallback = false): boolean {
   return v === '1' || v === 'true' || v === 'yes'
 }
 
+function inr(amount: number): string {
+  return `₹${amount.toLocaleString('en-IN')}`
+}
+
 export const BRAND = {
   name: str(process.env.NEXT_PUBLIC_BRAND_NAME, 'Suvidhi'),
   email: str(process.env.NEXT_PUBLIC_BRAND_EMAIL, 'innohealthbysush@gmail.com'),
@@ -32,51 +36,111 @@ export const BRAND = {
   phoneDisplay: str(process.env.NEXT_PUBLIC_BRAND_PHONE_DISPLAY, '+91 98108 80970'),
 } as const
 
-export const OFFER = {
-  name: str(process.env.NEXT_PUBLIC_OFFER_NAME, 'The Postpartum Restore'),
-  price: num(process.env.NEXT_PUBLIC_OFFER_PRICE_INR, 497),
-  fullPrice: num(process.env.NEXT_PUBLIC_OFFER_FULL_PRICE_INR, 21000),
-  currency: str(process.env.NEXT_PUBLIC_OFFER_CURRENCY, 'INR'),
-  // For UI display — formatted with Indian numbering
-  get priceLabel(): string {
-    return `₹${this.price.toLocaleString('en-IN')}`
-  },
-  get fullPriceLabel(): string {
-    return `₹${this.fullPrice.toLocaleString('en-IN')}`
-  },
-  get savingsLabel(): string {
-    const diff = Math.max(0, this.fullPrice - this.price)
-    return `₹${diff.toLocaleString('en-IN')}`
-  },
-  get discountPctLabel(): string {
-    if (this.fullPrice <= 0) return ''
-    const pct = Math.round(((this.fullPrice - this.price) / this.fullPrice) * 100)
-    return `${pct}% off`
+// ─── Locked naming (dev spec §1.5) ───────────────────────────────────
+// Never "Dr." / "Dt.", never "The Postpartum Restore" as a ₹297 product.
+export const NAMING = {
+  clinician: 'Suvidhi Pandey',
+  clinicianTitle: 'Clinical Nutritionist',
+  programme: 'The 90-Day Postpartum Restore Programme',
+  programmeShort: '90-Day Postpartum Restore Programme',
+  mechanism: 'The 4-System Postpartum Check',
+  call: 'Postpartum Recovery Roadmap Call',
+  library: 'The Postpartum Restore Video Library',
+} as const
+
+// ─── Social proof, stated identically everywhere (dev spec §1.4) ─────
+// ONE number the clinician can defend live on a call. Years in practice is a
+// separate, non-competing stat — never blended into this count.
+export const PROOF = {
+  mothers: str(process.env.NEXT_PUBLIC_PROOF_MOTHERS, '200+'),
+  rating: str(process.env.NEXT_PUBLIC_PROOF_RATING, '4.9'),
+  yearsInPractice: str(process.env.NEXT_PUBLIC_PROOF_YEARS, '7'),
+  avgRecoveryWeeks: str(process.env.NEXT_PUBLIC_PROOF_RECOVERY_WEEKS, '12wk'),
+} as const
+
+// The paid 90-day programme. Quoted in ONE place only (FAQ Q.07) — it is not
+// sold on this page, the ₹97 call is.
+export const PROGRAMME = {
+  startingPrice: num(process.env.NEXT_PUBLIC_PROGRAMME_START_INR, 14500),
+  get startingPriceLabel(): string {
+    return inr(this.startingPrice)
   },
 } as const
 
-// Itemised value-stack — the "Recap of Everything You Will Get" pricing.
-// Every amount reads from env so the entire stack is editable without code.
-// The `core` items are the included deliverables; `bonus` items are the free
-// add-ons. Labels live here because they're product copy, not pricing.
-export interface ValueItem {
-  label: string
-  amount: number
-  kind: 'core' | 'bonus'
+// ─── The two things that can actually be bought here ─────────────────
+//
+// PRICING MODEL: `bundle` is an ALL-IN price, not ₹97 + ₹497. Selecting the
+// bundle on /oto replaces the ₹97 line rather than adding to it. Flip
+// NEXT_PUBLIC_BUNDLE_PRICE_INR to 594 if it should ever become additive.
+export type PlanId = 'call' | 'bundle'
+
+export interface Plan {
+  id: PlanId
+  /** Amount actually charged, in INR major units. */
+  price: number
+  priceLabel: string
+  /** Razorpay description + order-summary title. */
+  name: string
+  /** Short label for chips / breadcrumbs. */
+  shortName: string
+  /** Order-summary line items. */
+  includes: readonly string[]
 }
 
-export const VALUE_STACK: readonly ValueItem[] = [
-  { label: 'The Postpartum Restore™ 25-Minute Guided Assessment', amount: num(process.env.NEXT_PUBLIC_VALUE_ASSESSMENT, 5000), kind: 'core' },
-  { label: 'The Postpartum Depletion Audit', amount: num(process.env.NEXT_PUBLIC_VALUE_DEPLETION_AUDIT, 1500), kind: 'core' },
-  { label: 'The Metabolic Recovery Audit', amount: num(process.env.NEXT_PUBLIC_VALUE_METABOLIC_AUDIT, 1500), kind: 'core' },
-  { label: 'The Supplement & Hair Recovery Audit', amount: num(process.env.NEXT_PUBLIC_VALUE_SUPPLEMENT_AUDIT, 1500), kind: 'core' },
-  { label: 'The Neuro-Endocrine Reset Audit', amount: num(process.env.NEXT_PUBLIC_VALUE_NEURO_AUDIT, 1500), kind: 'core' },
-  { label: '30-Minute Postpartum Assessment Call with Suvidhi', amount: num(process.env.NEXT_PUBLIC_VALUE_CALL, 2500), kind: 'bonus' },
-  { label: 'Private Postpartum Mothers Community', amount: num(process.env.NEXT_PUBLIC_VALUE_COMMUNITY, 3000), kind: 'bonus' },
-  { label: 'Monthly Group Coaching Sessions', amount: num(process.env.NEXT_PUBLIC_VALUE_COACHING, 4500), kind: 'bonus' },
+const CALL_PRICE = num(process.env.NEXT_PUBLIC_CALL_PRICE_INR, 97)
+const BUNDLE_PRICE = num(process.env.NEXT_PUBLIC_BUNDLE_PRICE_INR, 497)
+
+const CALL_INCLUDES = [
+  'A 30-minute 1:1 Postpartum Recovery Roadmap Call with Suvidhi',
+  'The 4-System Postpartum Check run against your own reports',
+  'Your primary and secondary block identified, and what to do first',
 ] as const
 
-export const VALUE_STACK_TOTAL = VALUE_STACK.reduce((sum, i) => sum + i.amount, 0)
+export const PLANS: Record<PlanId, Plan> = {
+  call: {
+    id: 'call',
+    price: CALL_PRICE,
+    priceLabel: inr(CALL_PRICE),
+    name: NAMING.call,
+    shortName: 'Roadmap Call',
+    includes: CALL_INCLUDES,
+  },
+  bundle: {
+    id: 'bundle',
+    price: BUNDLE_PRICE,
+    priceLabel: inr(BUNDLE_PRICE),
+    name: `${NAMING.call} + ${NAMING.library}`,
+    shortName: 'Call + Video Library',
+    includes: [
+      ...CALL_INCLUDES,
+      `${NAMING.library} — the amino acid meal framework, the 14-day circadian reset, the supplement absorption fixes and the hair-fall protocol`,
+      'The private WhatsApp community of postpartum mothers',
+      'Lifetime access, one payment — opens the moment your call ends',
+    ],
+  },
+} as const
+
+export const ADDON_ONLY_PRICE = Math.max(0, BUNDLE_PRICE - CALL_PRICE)
+export const ADDON_ONLY_PRICE_LABEL = inr(ADDON_ONLY_PRICE)
+
+/** Narrow anything (query param, sessionStorage blob) to a real plan. */
+export function resolvePlan(value: unknown): Plan {
+  return value === 'bundle' ? PLANS.bundle : PLANS.call
+}
+
+// Razorpay modal metadata + the currency every amount is charged in.
+export const OFFER = {
+  name: str(process.env.NEXT_PUBLIC_OFFER_NAME, NAMING.call),
+  currency: str(process.env.NEXT_PUBLIC_OFFER_CURRENCY, 'INR'),
+} as const
+
+// The repeating CTA block's countdown (dev spec §1.3). A near-5-hour window
+// reads as a daily offer; the old 15-minute timer read as a trick.
+export const OFFER_WINDOW = {
+  hours: num(process.env.NEXT_PUBLIC_OFFER_WINDOW_HOURS, 4),
+  minutes: num(process.env.NEXT_PUBLIC_OFFER_WINDOW_MINUTES, 59),
+  seconds: num(process.env.NEXT_PUBLIC_OFFER_WINDOW_SECONDS, 58),
+} as const
 
 export const COUPON = {
   code: str(process.env.NEXT_PUBLIC_TEST_COUPON_CODE, 'tgotest2025').toUpperCase(),
@@ -113,6 +177,10 @@ export const PABBLY = {
 
 export const WHATSAPP = {
   communityUrl: str(process.env.NEXT_PUBLIC_WHATSAPP_COMMUNITY_URL, ''),
+} as const
+
+export const SKOOL = {
+  url: str(process.env.NEXT_PUBLIC_SKOOL_COMMUNITY_URL, ''),
 } as const
 
 export const GA4 = {

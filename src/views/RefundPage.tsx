@@ -4,7 +4,7 @@ import { Container } from '@/components/ui/Container'
 import { TopMarquee } from '@/components/sections/TopMarquee'
 import { Footer } from '@/components/sections/Footer'
 import { PolicyHeader } from '@/components/sections/PolicyHeader'
-import { OFFER } from '@/lib/config'
+import { PLANS } from '@/lib/config'
 
 export default function RefundPage() {
   useEffect(() => {
@@ -19,7 +19,7 @@ export default function RefundPage() {
         <PolicyHeader
           eyebrow="Legal · Refund Policy"
           title="Refund Policy"
-          subtitle={`We'd rather give back ${OFFER.priceLabel} than waste your time. This page explains exactly when and how refunds are processed.`}
+          subtitle={`We'd rather give back ${PLANS.call.priceLabel} than waste your time. This page explains exactly when and how refunds are processed.`}
           lastUpdated="February 2026"
         />
 
@@ -33,9 +33,9 @@ export default function RefundPage() {
               />
               <p className="text-ink-800 text-[15px] leading-relaxed m-0">
                 <strong className="text-ink-950">Our promise:</strong> If you attend
-                the Clarity Call and feel it didn't give you meaningful insight into
+                the Roadmap Call and feel it didn't give you meaningful insight into
                 your sugar patterns, write to us and we'll refund your{' '}
-                {OFFER.priceLabel} in full. No arguments, no pressure.
+                {PLANS.call.priceLabel} in full. No arguments, no pressure.
               </p>
             </div>
 
@@ -55,9 +55,9 @@ export default function RefundPage() {
               .
             </p>
 
-            <h2>2. Refund Eligibility — Clarity Call ({OFFER.priceLabel})</h2>
+            <h2>2. Refund Eligibility — Roadmap Call ({PLANS.call.priceLabel})</h2>
             <p>
-              You are eligible for a full refund of the {OFFER.priceLabel} Clarity Call
+              You are eligible for a full refund of the {PLANS.call.priceLabel} Roadmap Call
               fee if:
             </p>
             <ul>

@@ -1,12 +1,15 @@
 import { Sparkles, ShieldCheck, Stethoscope, Sprout, Award, Heart } from 'lucide-react'
+import { PROOF } from '@/lib/config'
 
+// Trust strip. Every claim here has to survive the QA checklist: one social
+// proof number, no "bonus", no rupee figure, no 14-day product refund.
 const items = [
   { icon: Stethoscope, text: 'UK-trained Clinical Nutritionist' },
   { icon: Sprout, text: 'Built for women 3-24 months postpartum' },
-  { icon: ShieldCheck, text: '14-Day money-back guarantee' },
+  { icon: ShieldCheck, text: '100% Money-back guarantee' },
   { icon: Heart, text: 'Cleared ≠ fully recovered' },
-  { icon: Award, text: '1000+ mothers · 4.9/5 rating' },
-  { icon: Sparkles, text: 'Bonus 1:1 call · Audits · Community included' },
+  { icon: Award, text: `${PROOF.mothers} mothers · ${PROOF.rating}/5 rating` },
+  { icon: Sparkles, text: 'Reports reviewed against postpartum ranges' },
 ]
 
 function MarqueeGroup({ ariaHidden = false }: { ariaHidden?: boolean }) {

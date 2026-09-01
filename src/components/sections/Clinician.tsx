@@ -2,27 +2,29 @@ import { motion } from 'framer-motion'
 import { Award, Check, GraduationCap, HeartHandshake, Microscope, Sprout } from 'lucide-react'
 import { Container } from '@/components/ui/Container'
 import { SectionHeading } from '@/components/ui/SectionHeading'
-import { PrimaryCTA } from '@/components/ui/PrimaryCTA'
+import { CtaBlock } from '@/components/ui/CtaBlock'
 import Image from 'next/image'
 import { fadeUp, slideInLeft, slideInRight, stagger, VIEWPORT_ONCE } from '@/lib/motion'
+import { NAMING, PROOF } from '@/lib/config'
 
 // Small 3D gradient badge that holds an icon — used for the credential pills.
 const badge3d =
   'grid place-items-center rounded-lg text-white shrink-0 shadow-[inset_0_1px_1px_rgba(255,255,255,0.45),0_3px_7px_-2px_rgba(203,74,93,0.5)] [background:linear-gradient(160deg,#de6976,#cb4a5d_60%,#963543)]'
 
+// Credential strip. The degree letters (BSc · MSc) are still pending from the
+// client, so nothing unverified is asserted here yet.
 const pills = [
   { icon: GraduationCap, label: 'UK-trained Clinical Nutritionist' },
   { icon: Sprout, label: 'Postpartum recovery specialist' },
-  { icon: Microscope, label: 'Reports · symptoms · lifestyle' },
-  { icon: HeartHandshake, label: 'Functional health · real life' },
+  { icon: Microscope, label: `${PROOF.yearsInPractice} years in practice` },
+  { icon: HeartHandshake, label: `${PROOF.mothers} mothers` },
 ]
 
 const points = [
-  'UK-trained Clinical Nutritionist specialising in postpartum recovery, metabolic health, and helping women feel like themselves again.',
-  'Works with women months, even years, postpartum still struggling with exhaustion, hair fall, brain fog, stubborn weight gain and low mood.',
-  'Believes being "cleared" after birth and being fully recovered are not the same thing, and built her work around the difference.',
-  'Helps mothers connect the dots between symptoms, blood markers and lifestyle patterns so they can stop guessing and decide with confidence.',
-  'Combines clinical nutrition, functional health principles and real-world strategy to uncover hidden factors, not just mask symptoms.',
+  'UK-trained Clinical Nutritionist specialising in postpartum recovery, metabolic health and thyroid.',
+  'Works with mothers from month 3 through to year 2 postpartum, including while breastfeeding.',
+  'Reads your bloodwork against postpartum ranges, not general population ranges.',
+  'Believes being cleared after birth and being recovered are two different things, and built her work around the difference.',
 ]
 
 export function Clinician() {
@@ -30,13 +32,13 @@ export function Clinician() {
     <section className="relative section-pad overflow-x-clip">
       <Container>
         <SectionHeading
-          eyebrow="The clinician behind The Postpartum Restore"
           title={
             <>
-              Meet <span className="grad-text">Suvidhi</span>
+              The Clinician Who Treats Postpartum As A{' '}
+              <span className="grad-text">24-Month Recovery</span>, Not A 6-Week
+              Checkup
             </>
           }
-          subtitle="No fad protocols. No one-size-fits-all PDFs. A UK-trained clinician who connects the dots between your reports, symptoms and life, so you can stop guessing."
         />
 
         <motion.div
@@ -46,12 +48,12 @@ export function Clinician() {
           viewport={VIEWPORT_ONCE}
           className="mt-10 sm:mt-12 lg:mt-14 grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center"
         >
-          {/* Photo placeholder — landscape */}
+          {/* Photo — landscape */}
           <motion.div variants={slideInLeft} className="relative">
             <div className="relative aspect-[4/3] rounded-[24px] overflow-hidden shadow-elev bg-cream-dark">
               <Image
                 src="/images/suvidhi/dsc00467.jpg"
-                alt="Suvidhi — UK-trained Clinical Nutritionist"
+                alt={`${NAMING.clinician} — UK-trained ${NAMING.clinicianTitle}`}
                 fill
                 sizes="(max-width: 1024px) 100vw, 50vw"
                 className="object-cover"
@@ -80,11 +82,29 @@ export function Clinician() {
           <motion.div variants={slideInRight} className="min-w-0 text-center lg:text-left">
             <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full surface-tint border border-brand-200/60 text-brand-700 text-[12px] font-semibold">
               <Award className="w-3.5 h-3.5" />
-              7+ years · 1000+ mothers supported
+              Meet your clinician
             </div>
-            <h3 className="mt-4 font-display text-2xl sm:text-3xl font-semibold text-ink-950 leading-tight">
-              A real clinician. <span className="grad-text">Your real postpartum.</span>
-            </h3>
+
+            <div className="mt-5 space-y-4 max-w-xl mx-auto lg:mx-0 text-left text-ink-700 text-[15px] leading-relaxed text-pretty">
+              <p>
+                {NAMING.clinician} trained in clinical nutrition in the UK and
+                came back to a market where postpartum care effectively ends at
+                the six-week checkup. Someone confirms you are healing, and that
+                is the last time anyone looks.
+              </p>
+              <p>
+                Nobody checks what nine months of pregnancy and however many
+                months of feeding took out of your stores. Nobody checks whether
+                your body has switched back out of survival mode. Nobody checks
+                whether the iron you are swallowing is actually reaching your
+                cells.
+              </p>
+              <p>
+                She built her practice around that gap. She reads your reports,
+                connects them to what you are actually feeling, and builds a
+                protocol around your biology instead of handing you a template.
+              </p>
+            </div>
 
             <motion.ul
               variants={stagger(0, 0.07)}
@@ -102,15 +122,13 @@ export function Clinician() {
                 </motion.li>
               ))}
             </motion.ul>
-
-            <div className="mt-7 flex flex-col items-center gap-2.5">
-              <PrimaryCTA size="lg" label="Get Instant Access" />
-              <p className="text-sm text-ink-600">
-                Includes a bonus 1:1 call with Suvidhi
-              </p>
-            </div>
           </motion.div>
         </motion.div>
+
+        {/* ── CTA block #4 of 6 ── */}
+        <div className="mt-12 sm:mt-14">
+          <CtaBlock />
+        </div>
       </Container>
     </section>
   )

@@ -22,11 +22,25 @@ function sha256(value: string): string {
   return crypto.createHash('sha256').update(value).digest('hex')
 }
 
-/** Test-mode gate — mirrors the funnel's `OFFER.price <= 1` convention. */
+/**
+ * The funnel-entry price (₹97 call). AddToCart and InitiateCheckout both fire
+ * BEFORE the buyer commits to a plan on /oto, so the call price — not the
+ * bundle price — is the correct value to report on those events.
+ *
+ * Kept as its own reader (rather than importing src/lib/config) because that
+ * module is client-side and Next only inlines NEXT_PUBLIC_* for the browser
+ * bundle; on the server we read process.env directly.
+ */
+function entryPrice(): number {
+  const price = Number(process.env.NEXT_PUBLIC_CALL_PRICE_INR ?? '')
+  // Falls back to the same 97 default as PLANS.call in src/lib/config.ts, so an
+  // unset env var behaves identically on the server and in the browser.
+  return Number.isFinite(price) && price > 0 ? price : 97
+}
+
+/** Test-mode gate — mirrors the funnel's `plan.price <= 1` convention. */
 export function isTrackingEnabled(): boolean {
-  const raw = process.env.NEXT_PUBLIC_OFFER_PRICE_INR ?? ''
-  const price = Number(raw)
-  return Number.isFinite(price) && price > 1
+  return entryPrice() > 1
 }
 
 export function metaCreds(): { pixelId: string; accessToken: string; testEventCode?: string } | null {
@@ -43,14 +57,16 @@ export function metaCreds(): { pixelId: string; accessToken: string; testEventCo
 }
 
 function offerValue(): number {
-  const price = Number(process.env.NEXT_PUBLIC_OFFER_PRICE_INR ?? '')
-  return Number.isFinite(price) && price > 0 ? price : 0
+  return entryPrice()
 }
 
 function contentBlock() {
   return {
     content_ids: ['postpartum_restore'],
-    content_name: process.env.NEXT_PUBLIC_OFFER_NAME || 'The Postpartum Restore',
+    // Fallback matches OFFER.name in src/lib/config.ts so an unset env var
+    // reports the same product name on the server and in the browser.
+    content_name:
+      process.env.NEXT_PUBLIC_OFFER_NAME || 'Postpartum Recovery Roadmap Call',
     content_type: 'product',
   }
 }

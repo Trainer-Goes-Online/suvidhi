@@ -1,31 +1,34 @@
 import { useState } from 'react'
 import { motion, useReducedMotion } from 'framer-motion'
-import { ArrowRight, Calendar } from 'lucide-react'
+import { ArrowRight } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { cn } from '@/lib/utils'
-import { OFFER } from '@/lib/config'
 import { utmQueryString } from '@/lib/utm'
 import { trackCheckoutCtaClick } from '@/lib/metaClient'
 import { CTA_ATTENTION_ANIMATE, CTA_ATTENTION_TRANSITION } from '@/lib/motion'
 
+/**
+ * THE call-to-action label (dev spec §1.1). One exact string, every position on
+ * the page, no variations — British "Personalised" is deliberate and on-brand.
+ */
+export const CTA_LABEL =
+  'Click Here To Get Your Personalised Diagnosis & Postpartum Recovery Roadmap'
+
+/** Every CTA now routes to the OTO step, never straight to a product checkout. */
+export const CTA_DESTINATION = '/oto'
+
 interface PrimaryCTAProps {
   className?: string
   label?: string
-  price?: string
-  oldPrice?: string
   size?: 'md' | 'lg' | 'xl'
-  showPrice?: boolean
   to?: string
 }
 
 export function PrimaryCTA({
   className,
-  label = 'Get Instant Access',
-  price = OFFER.priceLabel,
-  oldPrice = OFFER.fullPriceLabel,
+  label = CTA_LABEL,
   size = 'lg',
-  showPrice = true,
-  to = '/checkout',
+  to = CTA_DESTINATION,
 }: PrimaryCTAProps) {
   const router = useRouter()
   const reduce = useReducedMotion()
@@ -33,15 +36,15 @@ export function PrimaryCTA({
 
   const sizeClass =
     size === 'xl'
-      ? 'px-7 sm:px-8 py-4 sm:py-[18px] text-[16px] sm:text-[17px]'
+      ? 'px-6 sm:px-9 py-3.5 sm:py-[18px] text-[14.5px] sm:text-[16.5px]'
       : size === 'lg'
-      ? 'px-6 sm:px-7 py-3.5 sm:py-4 text-[15px] sm:text-base'
-      : 'px-5 sm:px-6 py-3 sm:py-3.5 text-[14px] sm:text-[15px]'
+      ? 'px-5 sm:px-8 py-3.5 sm:py-4 text-[14px] sm:text-[15.5px]'
+      : 'px-5 sm:px-6 py-3 sm:py-3.5 text-[13.5px] sm:text-[14.5px]'
 
   return (
     <motion.button
       onClick={() => {
-        // Meta AddToCart + GA4 add_to_cart (once per browser, /checkout only).
+        // Meta AddToCart + GA4 add_to_cart (once per browser, funnel entry only).
         trackCheckoutCtaClick(to)
         router.push(to + utmQueryString())
       }}
@@ -49,11 +52,13 @@ export function PrimaryCTA({
       onHoverEnd={() => setHovered(false)}
       animate={reduce ? undefined : CTA_ATTENTION_ANIMATE}
       transition={reduce ? undefined : CTA_ATTENTION_TRANSITION}
-      whileHover={{ scale: 1.04, y: -2 }}
-      whileTap={{ scale: 0.97 }}
+      whileHover={{ scale: 1.02, y: -2 }}
+      whileTap={{ scale: 0.98 }}
       className={cn(
-        'group relative inline-flex items-center justify-center gap-2.5 overflow-hidden',
-        'rounded-full font-semibold tracking-tight whitespace-nowrap',
+        'group relative inline-flex w-full max-w-2xl items-center justify-center gap-2.5 overflow-hidden',
+        // The spec label is long — it MUST be allowed to wrap on narrow screens
+        // rather than shrink to an unreadable size.
+        'rounded-3xl sm:rounded-full font-semibold tracking-tight text-balance leading-snug',
         'bg-brand-600 text-white hover:bg-brand-700',
         'shadow-elev hover:shadow-glow',
         'transition-[box-shadow,background-color] duration-500 ease-out',
@@ -71,18 +76,9 @@ export function PrimaryCTA({
         className="pointer-events-none absolute inset-y-0 left-0 w-1/3 skew-x-[-12deg]"
         style={{ background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,.3) 50%, transparent 100%)' }}
       />
-      <Calendar className="relative w-[18px] h-[18px] opacity-90" aria-hidden />
       <span className="relative">{label}</span>
-      {showPrice && (
-        <span className="relative hidden sm:inline-flex items-center gap-2 ml-1">
-          <span className="text-white/60 line-through text-sm font-medium">{oldPrice}</span>
-          <span className="px-2 py-0.5 rounded-full bg-white/15 border border-white/15 text-white">
-            {price}
-          </span>
-        </span>
-      )}
       <ArrowRight
-        className="relative w-[18px] h-[18px] transition-transform duration-300 ease-out group-hover:translate-x-0.5"
+        className="relative w-[18px] h-[18px] shrink-0 transition-transform duration-300 ease-out group-hover:translate-x-0.5"
         aria-hidden
       />
     </motion.button>

@@ -3,6 +3,7 @@ import Script from 'next/script'
 import { Sora, Inter_Tight, Pacifico } from 'next/font/google'
 import '@/index.css'
 import { Analytics } from './Analytics'
+import { NAMING, PLANS } from '@/lib/config'
 
 // Self-hosted via next/font — eliminates the render-blocking Google Fonts
 // stylesheet (and its two preconnects). Each family is exposed as a CSS
@@ -30,13 +31,15 @@ const pacifico = Pacifico({
 })
 
 export const metadata: Metadata = {
-  title: "Suvidhi — The Postpartum Restore™ · Find Out Why You Haven't Recovered",
-  description:
-    "The Postpartum Restore™ is a 25-minute guided assessment that helps you find out exactly why your body hasn't fully recovered after baby — and what to do about it. By a UK-trained clinical nutritionist.",
+  title:
+    'Lose 5-15 Kilos & Reduce Mummy Belly · The 90-Day Postpartum Restore Programme',
+  // Price + mechanism names come from config so the SEO description can never
+  // drift from what the page itself renders.
+  description: `Book a ${PLANS.call.priceLabel} ${NAMING.call} with ${NAMING.clinician}, a UK-trained ${NAMING.clinicianTitle}. In 30 minutes she runs ${NAMING.mechanism} against your own reports and tells you which of the four reasons your body is still stuck applies to you.`,
   openGraph: {
-    title: 'Suvidhi — The Postpartum Restore™',
+    title: 'Lose 5-15 Kilos & Reduce Mummy Belly · Suvidhi Pandey',
     description:
-      "Find out exactly why your body hasn't fully recovered after baby, and what to do about it, in just 25 minutes.",
+      'Your reports came back normal and you still don’t feel normal. In 30 minutes, find out which of the four systems is keeping your postpartum recovery stuck.',
     type: 'website',
   },
 }

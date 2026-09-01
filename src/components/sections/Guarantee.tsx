@@ -1,9 +1,44 @@
 import { motion } from 'framer-motion'
 import { ShieldCheck } from 'lucide-react'
 import { Container } from '@/components/ui/Container'
-import { GradientCTA } from '@/components/ui/GradientCTA'
 import { fadeUp, scaleIn, stagger, VIEWPORT_ONCE } from '@/lib/motion'
-import { BRAND, OFFER } from '@/lib/config'
+
+/**
+ * The outcome guarantee (dev spec §2, Section 9).
+ *
+ * Replaces the old 14-day money-back on a ₹297 product that no longer exists —
+ * a refund window makes no sense on a call you have already taken. The
+ * reference pages guarantee the PROGRAMME OUTCOME and pair it with a "What We
+ * Ask In Return" list; those conditions are what make a bold guarantee safe to
+ * make, because they do the qualifying.
+ *
+ * NOTE FOR THE CLIENT: the wording deliberately guarantees "improvement against
+ * an agreed baseline" rather than a fixed kilo figure — a hard weight promise
+ * would be clinically inappropriate for a postpartum and breastfeeding
+ * population. This needs Suvidhi's explicit sign-off before it ships.
+ */
+const CONDITIONS: { title: string; desc: string }[] = [
+  {
+    title: 'Your baseline is set in week one.',
+    desc: 'Bloodwork, measurements, symptom scores, energy, sleep and feeding status recorded before anything starts, and your goal agreed with Suvidhi at that point.',
+  },
+  {
+    title: 'You follow the protocol.',
+    desc: 'Nutrition protocol followed, supplement protocol followed, movement protocol completed as prescribed for your stage.',
+  },
+  {
+    title: 'You attend your scheduled reviews.',
+    desc: 'Progress updates, logs and requested measurements shared on schedule.',
+  },
+  {
+    title: 'Your progress is tracked throughout.',
+    desc: 'Results are reviewed against your week-one baseline, with the protocol adjusted based on how your body responds.',
+  },
+  {
+    title: 'The 90 days run from your programme start date.',
+    desc: 'Your window opens the day your protocol begins, not the day you book.',
+  },
+]
 
 export function Guarantee() {
   return (
@@ -14,63 +49,73 @@ export function Guarantee() {
           initial="hidden"
           whileInView="show"
           viewport={VIEWPORT_ONCE}
-          className="relative rounded-[28px] sm:rounded-[36px] bg-white border border-ink-100 shadow-elev overflow-hidden p-7 sm:p-10 lg:p-12 text-center flex flex-col items-center"
+          className="relative overflow-hidden rounded-[28px] border border-ink-100 bg-white p-7 shadow-elev sm:rounded-[36px] sm:p-10 lg:p-12"
         >
           {/* soft brand wash */}
           <div
             aria-hidden
-            className="absolute -top-24 left-1/2 -translate-x-1/2 w-[120%] h-56 blur-3xl opacity-60 pointer-events-none"
+            className="pointer-events-none absolute -top-24 left-1/2 h-56 w-[120%] -translate-x-1/2 opacity-60 blur-3xl"
             style={{
               background:
                 'radial-gradient(closest-side, rgba(236,158,169,.4), transparent 70%)',
             }}
           />
 
-          <motion.h2 variants={fadeUp} className="relative h-section text-balance">
-            <span className="grad-text">14-Day Money-Back</span> Guarantee
-          </motion.h2>
-          <motion.p
-            variants={fadeUp}
-            className="relative mt-3 text-ink-700 text-[16px] sm:text-lg font-medium"
-          >
-            Try The Postpartum Restore™ completely risk-free
-          </motion.p>
+          <div className="relative flex flex-col items-center text-center">
+            <motion.span variants={fadeUp} className="eyebrow">
+              The Risk Is Ours. Not Yours.
+            </motion.span>
 
-          {/* Refund seal */}
-          <motion.div variants={scaleIn} className="relative mt-8 mb-2">
-            <RefundSeal />
-          </motion.div>
+            <motion.h2 variants={fadeUp} className="mt-4 h-section text-balance">
+              Measurable Recovery In 90 Days.{' '}
+              <span className="grad-text">Or You Get Your Money Back.</span>
+            </motion.h2>
 
-          {/* Body copy */}
-          <motion.div
-            variants={fadeUp}
-            className="relative mt-6 space-y-4 max-w-xl text-ink-700 text-[15.5px] sm:text-[16px] leading-relaxed text-pretty"
-          >
-            <p>
+            <motion.div variants={scaleIn} className="mt-8 mb-2">
+              <RefundSeal />
+            </motion.div>
+
+            <motion.p
+              variants={fadeUp}
+              className="mt-6 max-w-xl text-[15.5px] leading-relaxed text-ink-700 text-pretty sm:text-[16px]"
+            >
+              If you complete your 90-day programme and your tracked markers and
+              measurements show{' '}
               <span className="font-semibold text-ink-950">
-                Get immediate access to The Postpartum Restore™
+                no improvement against the baseline set in week one
               </span>
-              , all 4 Recovery Audits, the Postpartum Mothers Community, and your bonus
-              resources, and see what insights you uncover about your own recovery.
-            </p>
-            <p>
-              If you genuinely feel The Postpartum Restore wasn't valuable, simply email{' '}
-              <a
-                href={`mailto:${BRAND.email}`}
-                className="font-semibold text-brand-700 underline-offset-2 hover:underline break-all"
-              >
-                {BRAND.email}
-              </a>{' '}
-              within 14 days of your purchase and we'll refund your{' '}
-              {OFFER.priceLabel} in full.
-            </p>
-            <p className="font-display text-lg font-semibold text-ink-950">
-              No questions asked!
-            </p>
-          </motion.div>
+              , we refund every rupee you paid us.
+            </motion.p>
+          </div>
 
-          <motion.div variants={fadeUp} className="relative mt-8 w-full max-w-md">
-            <GradientCTA className="w-full" />
+          {/* What We Ask In Return */}
+          <motion.div variants={fadeUp} className="relative mt-10 sm:mt-12">
+            <h3 className="text-center font-display text-xl font-semibold leading-tight text-ink-950 sm:text-2xl">
+              What We Ask In Return
+            </h3>
+
+            <motion.ul
+              variants={stagger(0.06, 0.06)}
+              initial="hidden"
+              whileInView="show"
+              viewport={VIEWPORT_ONCE}
+              className="mt-6 space-y-3"
+            >
+              {CONDITIONS.map((c) => (
+                <motion.li
+                  key={c.title}
+                  variants={fadeUp}
+                  className="rounded-2xl border border-brand-200/50 surface-tint p-4 sm:p-5"
+                >
+                  <p className="font-display text-[15px] font-semibold leading-snug text-ink-950 sm:text-[16px]">
+                    {c.title}
+                  </p>
+                  <p className="mt-1.5 text-[14px] leading-relaxed text-ink-700 text-pretty sm:text-[14.5px]">
+                    {c.desc}
+                  </p>
+                </motion.li>
+              ))}
+            </motion.ul>
           </motion.div>
         </motion.div>
       </Container>
@@ -81,10 +126,10 @@ export function Guarantee() {
 function RefundSeal() {
   return (
     <div
-      className="flex flex-col items-center gap-3 select-none"
-      aria-label="14-day full money-back guarantee"
+      className="flex select-none flex-col items-center gap-3"
+      aria-label="Money-back guarantee on measurable 90-day recovery"
     >
-      <div className="relative grid place-items-center w-28 h-28 sm:w-32 sm:h-32">
+      <div className="relative grid h-28 w-28 place-items-center sm:h-32 sm:w-32">
         {/* soft neon halo */}
         <span aria-hidden className="absolute inset-2 rounded-full bg-brand-300/40 blur-xl" />
         {/* rotating dashed ring */}
@@ -98,19 +143,18 @@ function RefundSeal() {
         <span aria-hidden className="absolute inset-3 rounded-full border border-brand-200/70" />
         {/* glossy brand core — icon only */}
         <div
-          className="relative grid place-items-center w-[5.25rem] h-[5.25rem] sm:w-[6rem] sm:h-[6rem] rounded-full text-white"
+          className="relative grid h-[5.25rem] w-[5.25rem] place-items-center rounded-full text-white sm:h-[6rem] sm:w-[6rem]"
           style={{
             background: 'linear-gradient(160deg, #de6976 0%, #CB4A5D 52%, #963543 100%)',
             boxShadow:
               'inset 0 2px 3px rgba(255,255,255,.45), inset 0 -4px 8px rgba(57,18,24,.35), 0 12px 26px -8px rgba(203,74,93,.6)',
           }}
         >
-          <ShieldCheck className="w-9 h-9 sm:w-10 sm:h-10 drop-shadow" strokeWidth={2} />
+          <ShieldCheck className="h-9 w-9 drop-shadow sm:h-10 sm:w-10" strokeWidth={2} />
         </div>
       </div>
-      {/* label below the seal */}
-      <span className="text-[12px] sm:text-[13px] font-bold uppercase tracking-[0.16em] text-brand-700">
-        14-Day Money-Back Guarantee
+      <span className="text-[12px] font-bold uppercase tracking-[0.16em] text-brand-700 sm:text-[13px]">
+        100% Money-Back Guarantee
       </span>
     </div>
   )

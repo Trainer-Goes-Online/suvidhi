@@ -66,10 +66,10 @@ export function BookACallStickyCTA({
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-1.5 text-[10.5px] uppercase tracking-[0.18em] font-semibold text-brand-700">
                       <Sparkles className="w-3 h-3" />
-                      Bonus call
+                      Step 1 · Not booked yet
                     </div>
                     <div className="text-[14px] sm:text-[15px] font-semibold text-ink-950 leading-tight">
-                      Pick your slot now
+                      Reserve your call slot
                     </div>
                   </div>
                 </div>
