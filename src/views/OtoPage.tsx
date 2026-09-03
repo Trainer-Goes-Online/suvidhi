@@ -30,6 +30,7 @@ import {
 } from '@/lib/config'
 import { captureUtm, utmQueryString } from '@/lib/utm'
 import { setFunnelState } from '@/lib/funnelState'
+import { fireOtoChoice } from '@/lib/metaClient'
 
 /**
  * The OTO step — the only place the buyer chooses what they are paying for.
@@ -90,6 +91,9 @@ export default function OtoPage() {
   }, [])
 
   const goToCheckout = () => {
+    // Fire the plan-choice event before navigating: call → only_call,
+    // bundle → call_plus_course (Meta via beacon + GA4), once per browser.
+    fireOtoChoice(plan)
     // Belt and braces: sessionStorage for a stripped URL, query string for a
     // refresh. Checkout prefers the query string.
     setFunnelState({ plan })

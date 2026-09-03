@@ -60,6 +60,12 @@ function offerValue(): number {
   return entryPrice()
 }
 
+/** The all-in bundle price (₹497) — reported on the `call_plus_course` event. */
+function bundlePrice(): number {
+  const p = Number(process.env.NEXT_PUBLIC_BUNDLE_PRICE_INR ?? '')
+  return Number.isFinite(p) && p > 0 ? p : 497
+}
+
 function contentBlock() {
   return {
     content_ids: ['postpartum_restore'],
@@ -135,6 +141,59 @@ export async function sendAddToCartEvent(input: AddToCartInput): Promise<CapiRes
     custom_data: {
       currency: 'INR',
       value: offerValue(),
+      ...contentBlock(),
+    },
+  }
+  if (input.eventSourceUrl) event.event_source_url = input.eventSourceUrl
+
+  const payload: Record<string, unknown> = { data: [event] }
+  if (input.testEventCode) payload.test_event_code = input.testEventCode
+
+  return postToMeta(input.pixelId, input.accessToken, payload)
+}
+
+// ─────────────────────────────────────────────────────────────────────
+// OTO plan choice — custom events fired when the buyer clicks Continue on /oto.
+//   plan 'call'   → `only_call`        (value = ₹97 call price)
+//   plan 'bundle' → `call_plus_course` (value = ₹497 all-in bundle price)
+// No PII exists yet (the form is on /checkout), so EMQ ~3–5, like AddToCart.
+// ─────────────────────────────────────────────────────────────────────
+
+export interface OtoChoiceInput {
+  pixelId: string
+  accessToken: string
+  testEventCode?: string
+  plan: 'call' | 'bundle'
+  fbc?: string
+  fbp?: string
+  clientIp?: string
+  clientUserAgent?: string
+  eventSourceUrl?: string
+}
+
+export async function sendOtoChoiceEvent(input: OtoChoiceInput): Promise<CapiResult> {
+  const eventName = input.plan === 'bundle' ? 'call_plus_course' : 'only_call'
+  const value = input.plan === 'bundle' ? bundlePrice() : entryPrice()
+
+  const userData: Record<string, unknown> = {}
+  if (input.fbc) userData.fbc = input.fbc
+  if (input.fbp) userData.fbp = input.fbp
+  if (input.clientIp) userData.client_ip_address = input.clientIp
+  if (input.clientUserAgent) userData.client_user_agent = input.clientUserAgent
+
+  const eventId = input.fbp
+    ? sha256(`${input.fbp}|${eventName}`)
+    : `${crypto.randomBytes(8).toString('hex')}_${eventName}`
+
+  const event: Record<string, unknown> = {
+    event_name: eventName,
+    event_time: Math.floor(Date.now() / 1000),
+    event_id: eventId,
+    action_source: 'website',
+    user_data: userData,
+    custom_data: {
+      currency: 'INR',
+      value,
       ...contentBlock(),
     },
   }

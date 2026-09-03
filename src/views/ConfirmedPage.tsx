@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { motion } from 'framer-motion'
 import Link from 'next/link'
 import {
+  AlertTriangle,
   CalendarCheck,
   Check,
   CheckCircle2,
@@ -88,6 +89,15 @@ export default function ConfirmedPage({ plan }: ConfirmedPageProps) {
   const isBundle = plan === 'bundle'
   const calendlyUrl = useMemo(() => buildCalendlyUrl(checkoutState), [checkoutState])
   const communityUrl = WHATSAPP.communityUrl ? appendUtm(WHATSAPP.communityUrl) : ''
+  // Direct WhatsApp chat to the team (NOT the community group) for buyers who
+  // can't find a slot — prefilled with the details we need to set one up.
+  const bookingHelpWa =
+    'https://wa.me/' +
+    BRAND.phone.replace(/\D/g, '') +
+    '?text=' +
+    encodeURIComponent(
+      "Hi Suvidhi's team, I've paid for my Postpartum Recovery Roadmap Call but couldn't find a slot on the calendar. My name: , email: , phone: , preferred day & time: ",
+    )
   const courseUrl = SKOOL.url ? appendUtm(SKOOL.url) : ''
   const firstName = checkoutState.name?.split(' ')[0]
   const totalSteps = isBundle ? 3 : 1
@@ -244,17 +254,76 @@ export default function ConfirmedPage({ plan }: ConfirmedPageProps) {
               )}
             </div>
 
-            <p className="mt-5 text-center text-[13px] text-ink-600">
-              Trouble seeing the calendar? Disable your ad-blocker, or write to us
-              at{' '}
-              <a
-                href={`mailto:${BRAND.email}`}
-                className="font-semibold text-brand-700 underline-offset-2 hover:underline break-all"
-              >
-                {BRAND.email}
-              </a>
-              .
-            </p>
+            {/* Calendar fallback — shown on both /confirmed and /confirmed-plus.
+                Reload first; if the embed still won't load, or no slot fits,
+                the buyer messages us and we set the slot up by hand. */}
+            <div className="mx-auto mt-6 max-w-3xl overflow-hidden rounded-[28px] border border-brand-200/60 surface-tint p-6 text-center sm:p-8">
+              <p className="text-[13.5px] leading-relaxed text-ink-700 text-pretty">
+                Can&apos;t see the calendar above?{' '}
+                <span className="font-semibold text-ink-950">
+                  Reload the page once.
+                </span>{' '}
+                If it still doesn&apos;t load, use the options below, you have
+                already paid, so you will not lose your slot.
+              </p>
+
+              <div className="mt-5 inline-flex items-center gap-2 rounded-full border border-brand-200/70 bg-white px-3.5 py-1.5 text-[11px] uppercase tracking-[0.18em] font-bold text-brand-700">
+                <AlertTriangle className="h-3.5 w-3.5" />
+                Preferred slot not available?
+              </div>
+
+              <h3 className="mt-4 font-display text-xl font-semibold leading-tight text-ink-950 sm:text-2xl text-balance">
+                Cannot find a time that works for you?
+              </h3>
+              <p className="mx-auto mt-3 max-w-xl text-[14px] leading-relaxed text-ink-700 text-pretty">
+                You have already paid, and your seat is reserved, so you will not
+                lose it. If none of the times above suit you, message us your{' '}
+                <span className="font-semibold text-ink-950">
+                  name, email, phone number, and your preferred day and time
+                </span>
+                , and we will personally set up your slot.
+              </p>
+
+              <div className="mt-6 flex flex-col items-center justify-center gap-3 sm:flex-row">
+                <a
+                  href={bookingHelpWa}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={cn(
+                    'inline-flex w-full items-center justify-center gap-2.5 rounded-full px-6 py-3.5 sm:w-auto',
+                    'bg-brand-600 text-white text-[15px] font-semibold tracking-tight',
+                    'shadow-elev transition-all duration-500 ease-out hover:-translate-y-0.5 hover:bg-brand-700 hover:shadow-glow',
+                    'focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-brand-500/30',
+                  )}
+                >
+                  <MessageCircle className="h-[18px] w-[18px]" />
+                  Message us on WhatsApp
+                </a>
+                <a
+                  href={`mailto:${BRAND.email}`}
+                  className={cn(
+                    'inline-flex w-full items-center justify-center gap-2.5 rounded-full px-6 py-3.5 sm:w-auto',
+                    'border border-brand-200 bg-white text-brand-700 text-[15px] font-semibold tracking-tight',
+                    'transition-all duration-300 hover:-translate-y-0.5 hover:border-brand-400 hover:shadow-soft',
+                    'focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-brand-500/25',
+                  )}
+                >
+                  <Mail className="h-[18px] w-[18px]" />
+                  Email us
+                </a>
+              </div>
+
+              <p className="mt-4 text-[12.5px] text-ink-600">
+                <span className="font-semibold text-ink-800">{BRAND.phoneDisplay}</span>
+                {' · '}
+                <a
+                  href={`mailto:${BRAND.email}`}
+                  className="font-semibold text-brand-700 underline-offset-2 hover:underline break-all"
+                >
+                  {BRAND.email}
+                </a>
+              </p>
+            </div>
           </Container>
         </section>
 
@@ -289,6 +358,8 @@ export default function ConfirmedPage({ plan }: ConfirmedPageProps) {
                       href={communityUrl}
                       target="_blank"
                       rel="noopener noreferrer"
+                      // GA4 `join_whatsapp` — once per browser. GA4 only.
+                      onClick={() => trackGa4EventOnce('join_whatsapp')}
                       className={cn(
                         'group relative mt-6 inline-flex items-center justify-center gap-2.5 overflow-hidden',
                         'rounded-full px-6 py-3.5 text-[15px] font-semibold tracking-tight',

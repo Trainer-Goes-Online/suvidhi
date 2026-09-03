@@ -13,24 +13,75 @@
  */
 
 import { trackGa4EventOnce } from './ga4'
+import type { PlanId } from './config'
 
 const ATC_KEY = 'svd_atc_fired'
 const IC_KEY = 'svd_ic_fired'
+const OTO_ONLY_CALL_KEY = 'svd_only_call_fired'
+const OTO_CALL_PLUS_KEY = 'svd_call_plus_course_fired'
 
 /**
- * The single entry point for every landing CTA that advances to checkout.
+ * The single entry point for every landing CTA that advances the funnel.
  * Fires Meta `AddToCart` + GA4 `add_to_cart`, each once per browser.
  *
- * GATED ON DESTINATION: only CTAs actually heading to /checkout count. The
- * hero's mobile "Get Instant Access ↓" button is an in-page scroll link
- * (href="#offer-card"), so it deliberately fires neither event.
+ * GATED ON DESTINATION: the landing CTAs now head to the plan-selector at /oto
+ * (not straight to /checkout), so the gate matches /oto. Any in-page scroll
+ * link (e.g. href="#…") deliberately fires neither event.
  *
  * Never blocks the click — navigation proceeds regardless.
  */
 export function trackCheckoutCtaClick(destination: string): void {
-  if (!destination || !destination.startsWith('/checkout')) return
+  if (!destination || !destination.startsWith('/oto')) return
   fireAddToCartOnce()
   trackGa4EventOnce('add_to_cart')
+}
+
+/**
+ * OTO plan choice — fires when the buyer clicks Continue on /oto:
+ *   call   → Meta `only_call`        + GA4 `only_call`
+ *   bundle → Meta `call_plus_course` + GA4 `call_plus_course`
+ *
+ * Each event fires once per browser. Meta goes via a beacon so it survives the
+ * navigation to /checkout; GA4 is synchronous. Never blocks the click.
+ */
+export function fireOtoChoice(plan: PlanId): void {
+  try {
+    if (typeof window === 'undefined') return
+    const eventName = plan === 'bundle' ? 'call_plus_course' : 'only_call'
+
+    // GA4 (dedups per event name internally).
+    trackGa4EventOnce(eventName)
+
+    // Meta — dedup per event name via localStorage, then beacon to the server.
+    const key = plan === 'bundle' ? OTO_CALL_PLUS_KEY : OTO_ONLY_CALL_KEY
+    let already = false
+    try {
+      already = window.localStorage.getItem(key) === '1'
+    } catch {
+      already = false
+    }
+    if (already) return
+    try {
+      window.localStorage.setItem(key, '1')
+    } catch {
+      /* private mode — best-effort */
+    }
+
+    const url = '/api/meta/oto-select'
+    const body = JSON.stringify({ plan, eventSourceUrl: window.location.href })
+    if (typeof navigator !== 'undefined' && typeof navigator.sendBeacon === 'function') {
+      navigator.sendBeacon(url, new Blob([body], { type: 'application/json' }))
+      return
+    }
+    void fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body,
+      keepalive: true,
+    }).catch(() => {})
+  } catch {
+    /* never break the click */
+  }
 }
 
 /** SHA-256 hex via Web Crypto (HTTPS + http://localhost). */

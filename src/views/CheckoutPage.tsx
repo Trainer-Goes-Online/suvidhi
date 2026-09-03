@@ -183,7 +183,7 @@ export default function CheckoutPage() {
     if (!form.lastName.trim()) next.lastName = 'Please share your last name'
     if (!form.email.trim()) next.email = 'We need an email to send your access'
     else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email))
-      next.email = 'That email looks off — please check'
+      next.email = 'That email looks off, please check'
     if (!form.phone) next.phone = 'Please add a reachable number'
     if (!form.city.trim()) next.city = 'Please add your town or city'
     setErrors(next)
@@ -391,9 +391,11 @@ export default function CheckoutPage() {
                   <h2 className="font-display text-2xl sm:text-3xl font-semibold text-ink-950 leading-tight">
                     Your details
                   </h2>
-                  <p className="mt-1.5 text-ink-600 text-sm">
-                    Honest answers make the call dramatically more useful.
-                  </p>
+                  {isBundle && (
+                    <p className="mt-1.5 text-ink-600 text-sm">
+                      Honest answers make the call dramatically more useful.
+                    </p>
+                  )}
                 </div>
 
                 <div className="grid sm:grid-cols-2 gap-5">
@@ -887,7 +889,7 @@ function RedirectNotice({ isBundle }: { isBundle: boolean }) {
   const steps = [
     {
       icon: Hourglass,
-      text: 'Give it up to 2 minutes. Your payment is confirmed in the background — the wait is normal, and nothing is wrong.',
+      text: 'Give it up to 20 seconds. Your payment is confirmed in the background, the wait is normal, and nothing is wrong.',
     },
     {
       icon: CalendarCheck,
@@ -942,8 +944,8 @@ function RedirectNotice({ isBundle }: { isBundle: boolean }) {
       </ol>
 
       <p className="mt-3.5 text-[12.5px] leading-relaxed text-ink-600">
-        Stuck on the payment screen for longer than that? Don&apos;t pay again —
-        email{' '}
+        Stuck on the payment screen for longer than that? Don&apos;t pay again,
+        share your debit confirmation message and email{' '}
         <a
           href="mailto:innohealthbysush@gmail.com"
           className="font-semibold text-brand-700 underline-offset-2 hover:underline"
@@ -1005,7 +1007,7 @@ function ConsentCheckbox({
           <span className="font-semibold text-ink-950">
             1:1 call with Suvidhi that I still need to book myself
           </span>
-          , and I&apos;ll stay on the page for up to 2 minutes after paying so I
+          , and I&apos;ll stay on the page for up to 20 seconds after paying so I
           can choose my slot on the next screen
           {isBundle
             ? ', join the WhatsApp community and pick up my course access.'
@@ -1025,7 +1027,7 @@ function ConsentCheckbox({
             className="mt-2 flex items-center gap-1.5 text-[12.5px] font-medium text-brand-700"
           >
             <AlertTriangle className="h-3.5 w-3.5 shrink-0" />
-            Please confirm this before paying — it&apos;s the step people miss.
+            Please confirm this before paying, it&apos;s the step people miss.
           </motion.p>
         )}
       </AnimatePresence>
