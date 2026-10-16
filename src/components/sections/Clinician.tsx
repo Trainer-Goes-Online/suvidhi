@@ -22,7 +22,7 @@ const pills = [
 
 const points = [
   'UK-trained Clinical Nutritionist specialising in postpartum recovery, metabolic health and thyroid.',
-  'Works with mothers from month 3 through to year 2 postpartum, including while breastfeeding.',
+  'Works with mothers from month 3 through to year 5 postpartum, including while breastfeeding.',
   'Reads your bloodwork against postpartum ranges, not general population ranges.',
   'Believes being cleared after birth and being recovered are two different things, and built her work around the difference.',
 ]

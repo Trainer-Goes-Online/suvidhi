@@ -4,18 +4,20 @@ import { Container } from '@/components/ui/Container'
 import Image from 'next/image'
 import { CtaBlock } from '@/components/ui/CtaBlock'
 import { fadeUp, scaleIn, stagger } from '@/lib/motion'
-import { NAMING, PLANS, PROOF } from '@/lib/config'
+import { NAMING, PROOF } from '@/lib/config'
+import { ASSETS } from '@/lib/assets'
 
-// Conditions the audience is fighting alongside weight loss — rendered as
-// pills *below* the sub-copy, the way the reference layout stacks
-// headline → sub-headline → proof line → pills.
+// The structural concerns this audience actually names, rendered as pills
+// *below* the sub-copy, the way the reference layout stacks
+// headline → sub-headline → proof line → pills. These mirror the four areas
+// labelled in the hero graphic, so the words and the picture agree.
 const PAIN_POINTS = [
-  'Thyroid Issues',
-  'Insulin Resistance',
-  'Excessive Hair Fall',
-  'Low Energy',
-  'Diastasis Recti',
-  'Brain Fog',
+  'Diastasis Recti (DR)',
+  'C-Section Shelf',
+  'Mummy Belly Pouch',
+  'Abdominal Doming',
+  'Core Weakness',
+  'Pelvic Floor Weakness',
 ]
 
 // Badge row above the eyebrow (dev spec §2, Section 1).
@@ -87,8 +89,8 @@ export function Hero() {
               <span className="absolute inline-flex w-full h-full rounded-full bg-brand-400 opacity-70 animate-ping" />
               <span className="relative inline-flex w-2 h-2 rounded-full bg-brand-600" />
             </span>
-            For Women 3–24 Months Postpartum Who Still Don&apos;t Feel Fully
-            Recovered
+            Moms Who Have Mummy Tummy &mdash; Even 3 Months To 5 Years After
+            Delivery
           </motion.span>
 
           {/* Title — outcome-led headline. Line 1 sits in a tinted box, the
@@ -120,8 +122,9 @@ export function Hero() {
           >
             Through the{' '}
             <span className="text-brand-800">{NAMING.programmeShort}</span>,
-            designed to help postpartum women recover, rebuild &amp; lose weight
-            sustainably.
+            designed to address stubborn postpartum weight, C-section belly,
+            weakened core muscles and Diastasis Recti through a personalised
+            recovery approach.
           </motion.p>
 
           {/* Proof line — leads into the condition pills below */}
@@ -132,18 +135,23 @@ export function Hero() {
             <span className="font-semibold text-ink-900">
               {PROOF.mothers} postpartum moms globally
             </span>{' '}
-            have achieved{' '}
-            {/* inline-block keeps the tinted box from splitting across lines */}
-            <span className="inline-block rounded-md bg-brand-50 border border-brand-200/70 px-1.5 py-0.5 font-semibold text-brand-700">
-              lasting weight loss
+            have worked towards{' '}
+            {/* The phrase is long enough to wrap on a phone, so the highlight
+                stays `inline` with box-decoration-clone — each wrapped fragment
+                keeps its own rounded, padded box instead of breaking open. */}
+            <span className="inline box-decoration-clone rounded-md bg-brand-50 border border-brand-200/70 px-1.5 py-0.5 font-semibold text-brand-700">
+              better weight management and postpartum recovery
             </span>{' '}
-            while overcoming challenges such as:
+            while dealing with concerns such as:
           </motion.p>
 
           {/* Condition pills */}
           <motion.div
             variants={fadeUp}
-            className="mt-4 flex flex-wrap justify-center gap-2 sm:gap-2.5"
+            // max-w-2xl, not the parent's 4xl: it forces the six pills to wrap
+            // 3 + 3 the way the source copy lays them out, instead of leaving a
+            // single orphan pill on the second row.
+            className="mt-4 flex max-w-2xl flex-wrap justify-center gap-2 sm:gap-2.5"
           >
             {PAIN_POINTS.map((p) => (
               <span
@@ -163,52 +171,38 @@ export function Hero() {
         {/* ── Hero graphic — occupies the slot the reference pages give a VSL.
             There is no video, so there is deliberately no "watch the short
             video below" line above it: a designed static panel instead of a
-            broken expectation (dev spec Part 3). ── */}
+            broken expectation (dev spec Part 3).
+
+            The artwork carries its own labels (DR / CORE / MUMMY TUMMY /
+            PELVIC FLOOR) baked into bright per-panel backgrounds, so it is
+            shown CLEAN — no scrim, no overlay headline, no corner badge. Any
+            of those would either dim the four panel colours or sit straight on
+            top of a label. The supporting line moves to a caption strip under
+            the image instead. ── */}
         <motion.div
           variants={scaleIn}
           initial={false}
           animate="show"
           className="relative mx-auto mt-9 sm:mt-11 w-full max-w-3xl"
         >
-          <div className="relative aspect-[16/9] w-full overflow-hidden rounded-[28px] border border-brand-200/60 shadow-elev bg-ink-950">
-            <Image
-              src="/images/suvidhi/dsc00257.jpg"
-              alt={`${NAMING.clinician} — ${NAMING.clinicianTitle}`}
-              fill
-              sizes="(max-width: 768px) 100vw, 768px"
-              className="object-cover object-top"
-              priority
-            />
-            {/* Legibility scrim — bottom-weighted so the overlay copy reads */}
-            <div
-              aria-hidden
-              className="absolute inset-0"
-              style={{
-                background:
-                  'linear-gradient(180deg, rgba(33,30,30,.55) 0%, rgba(33,30,30,.05) 35%, rgba(57,18,24,.85) 100%)',
-              }}
-            />
-
-            {/* Top-left credential badge */}
-            <span className="absolute left-3 top-3 sm:left-5 sm:top-5 inline-flex items-center gap-1.5 rounded-full bg-white/12 border border-white/25 backdrop-blur-md px-2.5 sm:px-3.5 py-1.5 text-[9.5px] sm:text-[11px] uppercase tracking-[0.16em] font-bold text-cream">
-              UK-Trained Clinical Nutritionist
-            </span>
-
-            {/* Overlay headline */}
-            <p className="absolute inset-x-4 sm:inset-x-8 bottom-14 sm:bottom-[4.5rem] font-display text-[15px] xs:text-[17px] sm:text-[22px] lg:text-[26px] font-semibold leading-snug text-cream text-balance">
-              30 minutes. Your blood report. The four reasons your body is still
-              stuck.
-            </p>
-
-            {/* Bottom bar */}
-            <div className="absolute inset-x-0 bottom-0 flex items-center justify-between gap-3 border-t border-white/15 bg-ink-950/45 px-4 sm:px-7 py-2.5 sm:py-3.5 backdrop-blur-md">
-              <span className="text-[9.5px] sm:text-[11.5px] uppercase tracking-[0.16em] font-bold text-cream/85 truncate">
-                {NAMING.mechanism}
-              </span>
-              <span className="shrink-0 font-display text-[15px] sm:text-[19px] font-semibold text-cream">
-                {PLANS.call.priceLabel}
-              </span>
+          <div className="overflow-hidden rounded-[28px] border border-brand-200/60 shadow-elev bg-white">
+            <div className="relative aspect-[16/9] w-full">
+              <Image
+                src={ASSETS.heroThumbnail}
+                alt="One mother shown across four stages of postpartum recovery — diastasis recti, core, mummy tummy and pelvic floor."
+                fill
+                sizes="(max-width: 768px) 100vw, 768px"
+                className="object-cover object-center"
+                priority
+              />
             </div>
+
+            {/* Caption strip — deliberately NOT the mechanism name. The four
+                panels above are body areas, not the four systems the call
+                reviews, and labelling them as such would mis-sell the call. */}
+            <p className="border-t border-brand-100 bg-cream/70 px-4 sm:px-7 py-2.5 sm:py-3.5 text-center text-[10.5px] sm:text-[12px] uppercase tracking-[0.16em] font-bold text-ink-600">
+              The four areas the {NAMING.programmeShort} rebuilds
+            </p>
           </div>
         </motion.div>
 

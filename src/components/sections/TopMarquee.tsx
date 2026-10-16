@@ -5,7 +5,7 @@ import { PROOF } from '@/lib/config'
 // proof number, no "bonus", no rupee figure, no 14-day product refund.
 const items = [
   { icon: Stethoscope, text: 'UK-trained Clinical Nutritionist' },
-  { icon: Sprout, text: 'Built for women 3-24 months postpartum' },
+  { icon: Sprout, text: 'Built for moms 3 months to 5 years postpartum' },
   { icon: ShieldCheck, text: '100% Money-back guarantee' },
   { icon: Heart, text: 'Cleared ≠ fully recovered' },
   { icon: Award, text: `${PROOF.mothers} mothers · ${PROOF.rating}/5 rating` },

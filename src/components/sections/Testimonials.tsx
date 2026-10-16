@@ -143,7 +143,7 @@ export function Testimonials() {
               Feel Like Themselves Again
             </>
           }
-          subtitle="These are women 3 months to 2 years postpartum. Working mothers, first-time mothers, second-time mothers."
+          subtitle="These are women 3 months to 5 years postpartum. Working mothers, first-time mothers, second-time mothers."
         />
 
         {/* ── Image testimonials ── */}

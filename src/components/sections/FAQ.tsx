@@ -29,7 +29,7 @@ const faqs: { q: string; a: string; badge?: string }[] = [
   },
   {
     q: 'How postpartum should I be for this to apply?',
-    a: 'Anywhere from 3 months to 2 years. The mothers who see the biggest change are often the ones furthest out, because they have been running on empty the longest and nobody has ever looked at why.',
+    a: 'Anywhere from 3 months to 5 years. The mothers who see the biggest change are often the ones furthest out, because they have been running on empty the longest and nobody has ever looked at why.',
   },
   {
     q: 'What if I don’t have recent blood work?',

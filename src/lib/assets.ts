@@ -5,6 +5,10 @@ const LOCAL = '/images/suvidhi'
 const REMOTE = 'https://suvidhi.innohealth.co.in/wp-content/uploads'
 
 export const ASSETS = {
+  // Hero graphic — the four concern areas the programme works on, shown as a
+  // left-to-right progression. Occupies the slot a VSL would take.
+  heroThumbnail: `${LOCAL}/postpartum-focus-areas.png`,
+
   // Primary clinician photos
   heroPortrait: `${LOCAL}/dsc00257.jpg`,
   clinicianPortrait: `${LOCAL}/dsc00293.jpg`,
