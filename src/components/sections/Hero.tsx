@@ -89,7 +89,7 @@ export function Hero() {
               <span className="absolute inline-flex w-full h-full rounded-full bg-brand-400 opacity-70 animate-ping" />
               <span className="relative inline-flex w-2 h-2 rounded-full bg-brand-600" />
             </span>
-            Moms Who Have Mummy Tummy &mdash; Even 3 Months To 5 Years After
+            Moms Who Have Mummy Tummy - Even 3 Months To 5 Years After
             Delivery
           </motion.span>
 
