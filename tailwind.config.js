@@ -88,16 +88,6 @@ export default {
           '0%,100%': { opacity: '0.55' },
           '50%': { opacity: '1' },
         },
-        // Marching-ants dashed border on the /register VIP box. The offset
-        // equals one dash + gap (10 + 7) × 2, so the loop is seamless.
-        dash: {
-          '0%': { strokeDashoffset: '0' },
-          '100%': { strokeDashoffset: '-34' },
-        },
-        nudgeX: {
-          '0%,100%': { transform: 'translateX(0)' },
-          '50%': { transform: 'translateX(5px)' },
-        },
       },
       animation: {
         marquee: 'marquee 38s linear infinite',
@@ -105,8 +95,6 @@ export default {
         floaty: 'floaty 4.5s ease-in-out infinite',
         shine: 'shine 2.8s linear infinite',
         breathe: 'breathe 3.5s ease-in-out infinite',
-        dash: 'dash 1.1s linear infinite',
-        nudgeX: 'nudgeX 1.1s ease-in-out infinite',
       },
       transitionTimingFunction: {
         'out-expo': 'cubic-bezier(0.16, 1, 0.3, 1)',

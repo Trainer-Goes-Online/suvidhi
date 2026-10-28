@@ -11,20 +11,8 @@
  *   • HighTicketPurchase  (sale_closed ✓ + value)  — contracted_value, INR
  */
 
-/**
- * What the lead actually took — lets the Pabbly workflow branch on one field:
- *   • call_only          — free Roadmap Call registration (/api/register)
- *   • call_video_library — PAID call + Video Library (Razorpay webhook)
- */
-export type PurchaseType = 'call_only' | 'call_video_library'
-
-export function isPurchaseType(v: unknown): v is PurchaseType {
-  return v === 'call_only' || v === 'call_video_library'
-}
-
 export interface PabblyRowInput {
   leadId: string
-  purchaseType: PurchaseType
   createdAt: string
   firstName: string
   lastName: string
@@ -59,8 +47,7 @@ export interface PabblyResult {
 }
 
 /**
- * POST the enriched row (32 sheet columns + purchase_type) to the Pabbly
- * webhook. Returns a result;
+ * POST the enriched 32-column row to the Pabbly webhook. Returns a result;
  * never throws (analytics must not break the payment response).
  */
 export async function sendPabblyRow(
@@ -88,7 +75,6 @@ export async function sendPabblyRow(
     amount: input.amount,
     is_test: input.isTest ? 'true' : 'false',
     purchase_event_id: input.purchaseEventId,
-    purchase_type: input.purchaseType,
     utm_source: input.utmSource,
     utm_medium: input.utmMedium,
     utm_campaign: input.utmCampaign,

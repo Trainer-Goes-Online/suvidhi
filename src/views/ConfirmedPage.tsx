@@ -23,45 +23,35 @@ import { cn } from '@/lib/utils'
 import { BRAND, CALENDLY, NAMING, SKOOL, WHATSAPP, type PlanId } from '@/lib/config'
 import { appendUtm, loadUtm } from '@/lib/utm'
 import { trackGa4EventOnce } from '@/lib/ga4'
-import { calendlyInviteeId, fireScheduleOnce } from '@/lib/metaClient'
 
 /**
- * The confirmation page reached from /register, in two variants:
+ * The post-payment confirmation page, in two variants:
  *
- *   plan="call"    → free registration. One step: book the call.
- *   plan="bundle"  → paid VIP upgrade. Three steps: book the call, join the
- *                    WhatsApp community, then collect the course credentials.
+ *   plan="call"    → one step: book the call.
+ *   plan="bundle"  → three steps: book the call, join the WhatsApp community,
+ *                    then collect the course credentials from email.
  *
  * Step 1 is the same in both, and it is deliberately the FIRST thing on the
- * page in both. Registering (or paying) does not book anything on its own —
- * this screen is where the slot actually gets reserved.
+ * page in both. Payment does not book anything on its own — this screen is
+ * where the slot actually gets reserved, which is exactly why /checkout now
+ * makes buyers acknowledge that they have to arrive here.
  */
 
 interface CheckoutState {
   plan?: string
   name?: string
-  firstName?: string
-  lastName?: string
   email?: string
   phone?: string
-  city?: string
-  countryCode?: string
   orderId?: string
   paymentId?: string
   amountPaid?: number
+  coupon?: string
 }
 
 function buildCalendlyUrl(state: CheckoutState): string {
   if (!CALENDLY.url) return ''
   const url = new URL(CALENDLY.url)
-  // Without these two, Calendly never posts `calendly.event_scheduled` to the
-  // parent window — the booking callback (and schedule_event) depend on them.
-  url.searchParams.set('embed_domain', window.location.hostname)
-  url.searchParams.set('embed_type', 'Inline')
-  // Both prefill styles — Calendly uses whichever the event's name field is.
   if (state.name) url.searchParams.set('name', state.name)
-  if (state.firstName) url.searchParams.set('first_name', state.firstName)
-  if (state.lastName) url.searchParams.set('last_name', state.lastName)
   if (state.email) url.searchParams.set('email', state.email)
   if (state.phone) url.searchParams.set('a1', state.phone)
   if (state.orderId) url.searchParams.set('a2', state.orderId)
@@ -130,31 +120,18 @@ export default function ConfirmedPage({ plan }: ConfirmedPageProps) {
 
       const data = ev.data
       if (!data || typeof data !== 'object') return
-      const msg = data as {
-        event?: string
-        payload?: { invitee?: { uri?: string } }
-      }
-      if (msg.event === 'calendly.event_scheduled') {
-        // Fires on an ACTUAL booking only. GA4 `book_a_call` + the server-side
-        // Meta `schedule_event` (CAPI, deduped on the Calendly invitee id).
+      if ((data as { event?: string }).event === 'calendly.event_scheduled') {
+        // GA4 only — fires on an ACTUAL booking, once per browser. No browser
+        // Meta event fires here: the downstream QualifiedLead CAPI event is
+        // fired by the CRM Apps Script when the sales team marks the lead
+        // qualified in the Sheet.
         trackGa4EventOnce('book_a_call')
-        fireScheduleOnce(
-          {
-            firstName: checkoutState.firstName,
-            lastName: checkoutState.lastName,
-            email: checkoutState.email ?? '',
-            phone: checkoutState.phone,
-            city: checkoutState.city,
-            countryCode: checkoutState.countryCode,
-          },
-          calendlyInviteeId(msg.payload?.invitee?.uri),
-        )
         setBooked(true)
       }
     }
     window.addEventListener('message', onMessage)
     return () => window.removeEventListener('message', onMessage)
-  }, [checkoutState])
+  }, [])
 
   return (
     <div className="relative min-h-screen flex flex-col">
@@ -185,15 +162,12 @@ export default function ConfirmedPage({ plan }: ConfirmedPageProps) {
                 className="inline-flex items-center gap-2 rounded-full bg-brand-50 border border-brand-200/70 px-3.5 py-2 text-[11px] uppercase tracking-[0.18em] font-bold text-brand-700"
               >
                 <CheckCircle2 className="w-3.5 h-3.5" />
-                {isBundle ? 'Payment received' : 'Registration received'}
+                Payment received
               </motion.span>
 
               <motion.h1 variants={fadeUp} className="h-display mt-5 text-balance">
                 {firstName ? `${firstName}, your ` : 'Your '}
-                <span className="grad-text">
-                  {isBundle ? 'payment is confirmed' : 'details are in'}
-                </span>
-                .
+                <span className="grad-text">payment is confirmed</span>.
               </motion.h1>
 
               <motion.p

@@ -12,7 +12,6 @@ import crypto from 'node:crypto'
 import { sendSalesEvent, hostOnlyUrl } from './metaCapi'
 import { sendPabblyRow } from './pabbly'
 import { getClientContext } from './requestContext'
-import { offerCurrency } from './metaEvents'
 
 export interface TrackingPayload {
   firstName?: string
@@ -56,7 +55,7 @@ export async function firePurchaseTracking(
   fireCapi: boolean,
 ): Promise<void> {
   const ctx = getClientContext(req, { fbc: t.fbc, fbp: t.fbp })
-  const currency = offerCurrency()
+  const currency = 'INR'
   const amount = typeof t.amount === 'number' ? t.amount : 0
   const isTest = !!t.isTest
 
@@ -112,8 +111,6 @@ export async function firePurchaseTracking(
     tasks.push(
       sendPabblyRow(pabblyUrl, {
         leadId: paymentId,
-        // Legacy 100%-off coupon path — no library was paid for.
-        purchaseType: 'call_only',
         createdAt: new Date().toISOString(),
         firstName: t.firstName ?? '',
         lastName: t.lastName ?? '',

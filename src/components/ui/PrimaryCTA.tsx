@@ -4,7 +4,7 @@ import { ArrowRight } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { cn } from '@/lib/utils'
 import { utmQueryString } from '@/lib/utm'
-import { REGISTER_PATH, trackCheckoutCtaClick } from '@/lib/metaClient'
+import { trackCheckoutCtaClick } from '@/lib/metaClient'
 import { CTA_ATTENTION_ANIMATE, CTA_ATTENTION_TRANSITION } from '@/lib/motion'
 
 /**
@@ -14,8 +14,8 @@ import { CTA_ATTENTION_ANIMATE, CTA_ATTENTION_TRANSITION } from '@/lib/motion'
 export const CTA_LABEL =
   'Click Here To Get Your Personalised Diagnosis & Postpartum Recovery Roadmap'
 
-/** Every CTA routes to the free registration form (with its VIP upgrade). */
-export const CTA_DESTINATION = REGISTER_PATH
+/** Every CTA now routes to the OTO step, never straight to a product checkout. */
+export const CTA_DESTINATION = '/oto'
 
 interface PrimaryCTAProps {
   className?: string
@@ -44,7 +44,7 @@ export function PrimaryCTA({
   return (
     <motion.button
       onClick={() => {
-        // Meta atc_event + GA4 add_to_cart (once per browser, funnel entry only).
+        // Meta AddToCart + GA4 add_to_cart (once per browser, funnel entry only).
         trackCheckoutCtaClick(to)
         router.push(to + utmQueryString())
       }}

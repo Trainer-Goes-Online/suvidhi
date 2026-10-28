@@ -1,4 +1,8 @@
-import { sendIcEvent, isTrackingEnabled, metaCreds } from '@/lib/server/metaEvents'
+import {
+  sendInitiateCheckoutEvent,
+  isTrackingEnabled,
+  metaCreds,
+} from '@/lib/server/metaEvents'
 import { getClientContext } from '@/lib/server/requestContext'
 
 export const runtime = 'nodejs'
@@ -11,10 +15,6 @@ function json(status: number, body: unknown): Response {
   })
 }
 
-function str(v: unknown): string | undefined {
-  return typeof v === 'string' && v ? v : undefined
-}
-
 interface IcCustomer {
   firstName?: string
   lastName?: string
@@ -22,16 +22,16 @@ interface IcCustomer {
   phone?: string
   city?: string
   countryCode?: string
+  amount?: number
 }
 
 /**
- * Fires the custom `ic_event` from /register, ONLY after client-side
- * validation passes:
- *   • free booking → just before the redirect to /confirmed
- *   • VIP upgrade  → just before the Razorpay order is created
+ * Fires Meta `InitiateCheckout` — triggered from the checkout submit handler
+ * ONLY after client-side validation passes and immediately before the
+ * create-order call. The free/coupon QA path never reaches here.
  *
- * Carries the full 11 matching signals. `vip` picks the value server-side
- * (₹0 vs the VIP price) — the browser never supplies an amount.
+ * Carries the full 11 matching signals (EMQ 9+). Never blocks payment: the
+ * client ignores the outcome apart from stamping its dedup flag on success.
  */
 export async function POST(req: Request): Promise<Response> {
   let body: Record<string, unknown> = {}
@@ -53,30 +53,36 @@ export async function POST(req: Request): Promise<Response> {
 
   const creds = metaCreds()
   if (!creds) {
-    console.log('[ic_event] skipped: env_missing')
+    console.log('[ic] skipped: env_missing')
     return json(200, { ok: true, skipped: 'env_missing' })
   }
 
-  const ctx = getClientContext(req, { fbc: str(body.fbc), fbp: str(body.fbp) })
-  const result = await sendIcEvent(
-    creds,
-    ctx,
-    {
-      email,
-      phone: customer.phone,
-      firstName: customer.firstName,
-      lastName: customer.lastName,
-      city: customer.city,
-      countryCode: customer.countryCode,
-    },
-    body.vip === true,
-    str(body.eventSourceUrl),
-  )
+  const ctx = getClientContext(req)
+  const eventSourceUrl =
+    typeof body.eventSourceUrl === 'string' ? body.eventSourceUrl : undefined
+
+  const result = await sendInitiateCheckoutEvent({
+    pixelId: creds.pixelId,
+    accessToken: creds.accessToken,
+    testEventCode: creds.testEventCode,
+    email,
+    phone: customer.phone,
+    firstName: customer.firstName,
+    lastName: customer.lastName,
+    city: customer.city,
+    countryCode: customer.countryCode,
+    fbc: ctx.fbc,
+    fbp: ctx.fbp,
+    clientIp: ctx.clientIp,
+    clientUserAgent: ctx.clientUserAgent,
+    eventSourceUrl,
+    value: customer.amount,
+  })
 
   if (result.ok) {
-    console.log(`[ic_event] sent (${body.vip === true ? 'vip' : 'free'})`)
+    console.log('[ic] InitiateCheckout sent')
     return json(200, { ok: true, capi: 'sent' })
   }
-  console.error('[ic_event] failed', result.status, result.body.slice(0, 300))
+  console.error('[ic] InitiateCheckout failed', result.status, result.body.slice(0, 300))
   return json(200, { ok: true, capi: 'error' })
 }

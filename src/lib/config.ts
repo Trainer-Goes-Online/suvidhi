@@ -25,22 +25,8 @@ function bool(value: string | undefined, fallback = false): boolean {
   return v === '1' || v === 'true' || v === 'yes'
 }
 
-// Currency every paid amount is shown and charged in. Hardcoded default is AED
-// (Dubai ads); override with NEXT_PUBLIC_OFFER_CURRENCY (any ISO code).
-const CURRENCY = str(process.env.NEXT_PUBLIC_OFFER_CURRENCY, 'AED').toUpperCase()
-
-function money(amount: number): string {
-  try {
-    return new Intl.NumberFormat('en', {
-      style: 'currency',
-      currency: CURRENCY,
-      minimumFractionDigits: Number.isInteger(amount) ? 0 : 2,
-    })
-      .format(amount)
-      .replace(/\u00a0/g, ' ')
-  } catch {
-    return `${CURRENCY} ${amount}`
-  }
+function inr(amount: number): string {
+  return `₹${amount.toLocaleString('en-IN')}`
 }
 
 export const BRAND = {
@@ -73,24 +59,24 @@ export const PROOF = {
 } as const
 
 // The paid 90-day programme. Quoted in ONE place only (FAQ Q.07) — it is not
-// sold on this page; the free Roadmap Call is.
+// sold on this page, the ₹97 call is.
 export const PROGRAMME = {
   startingPrice: num(process.env.NEXT_PUBLIC_PROGRAMME_START_INR, 14500),
   get startingPriceLabel(): string {
-    return `₹${this.startingPrice.toLocaleString('en-IN')}`
+    return inr(this.startingPrice)
   },
 } as const
 
-// ─── The two ways through /register ──────────────────────────────────
+// ─── The two things that can actually be bought here ─────────────────
 //
-// PRICING MODEL: the Roadmap Call is FREE — no payment, no Razorpay. The only
-// paid path is the VIP upgrade on /register, which adds the Video Library and
-// charges the add-on price (AED 9.99 by default) through Razorpay.
+// PRICING MODEL: `bundle` is an ALL-IN price, not ₹97 + ₹497. Selecting the
+// bundle on /oto replaces the ₹97 line rather than adding to it. Flip
+// NEXT_PUBLIC_BUNDLE_PRICE_INR to 594 if it should ever become additive.
 export type PlanId = 'call' | 'bundle'
 
 export interface Plan {
   id: PlanId
-  /** Amount actually charged, in major units of OFFER.currency. */
+  /** Amount actually charged, in INR major units. */
   price: number
   priceLabel: string
   /** Razorpay description + order-summary title. */
@@ -101,13 +87,8 @@ export interface Plan {
   includes: readonly string[]
 }
 
-// The call is free by design. Deliberately NOT read from
-// NEXT_PUBLIC_CALL_PRICE_INR any more, so a stale ₹97 left in an old .env can
-// never bring the payment back.
-const CALL_PRICE = 0
-// Add-on price in major units of NEXT_PUBLIC_OFFER_CURRENCY. Default 9.99 AED;
-// override with NEXT_PUBLIC_ADDON_PRICE.
-const BUNDLE_PRICE = num(process.env.NEXT_PUBLIC_ADDON_PRICE, 9.99)
+const CALL_PRICE = num(process.env.NEXT_PUBLIC_CALL_PRICE_INR, 97)
+const BUNDLE_PRICE = num(process.env.NEXT_PUBLIC_BUNDLE_PRICE_INR, 497)
 
 const CALL_INCLUDES = [
   'A 30-minute 1:1 Postpartum Recovery Roadmap Call with Suvidhi',
@@ -119,7 +100,7 @@ export const PLANS: Record<PlanId, Plan> = {
   call: {
     id: 'call',
     price: CALL_PRICE,
-    priceLabel: 'Free',
+    priceLabel: inr(CALL_PRICE),
     name: NAMING.call,
     shortName: 'Roadmap Call',
     includes: CALL_INCLUDES,
@@ -127,7 +108,7 @@ export const PLANS: Record<PlanId, Plan> = {
   bundle: {
     id: 'bundle',
     price: BUNDLE_PRICE,
-    priceLabel: money(BUNDLE_PRICE),
+    priceLabel: inr(BUNDLE_PRICE),
     name: `${NAMING.call} + ${NAMING.library}`,
     shortName: 'Call + Video Library',
     includes: [
@@ -140,7 +121,7 @@ export const PLANS: Record<PlanId, Plan> = {
 } as const
 
 export const ADDON_ONLY_PRICE = Math.max(0, BUNDLE_PRICE - CALL_PRICE)
-export const ADDON_ONLY_PRICE_LABEL = money(ADDON_ONLY_PRICE)
+export const ADDON_ONLY_PRICE_LABEL = inr(ADDON_ONLY_PRICE)
 
 /** Narrow anything (query param, sessionStorage blob) to a real plan. */
 export function resolvePlan(value: unknown): Plan {
@@ -150,7 +131,7 @@ export function resolvePlan(value: unknown): Plan {
 // Razorpay modal metadata + the currency every amount is charged in.
 export const OFFER = {
   name: str(process.env.NEXT_PUBLIC_OFFER_NAME, NAMING.call),
-  currency: CURRENCY,
+  currency: str(process.env.NEXT_PUBLIC_OFFER_CURRENCY, 'INR'),
 } as const
 
 // The repeating CTA block's countdown (dev spec §1.3). A near-5-hour window

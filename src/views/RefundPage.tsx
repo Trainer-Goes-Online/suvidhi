@@ -19,7 +19,7 @@ export default function RefundPage() {
         <PolicyHeader
           eyebrow="Legal · Refund Policy"
           title="Refund Policy"
-          subtitle={`The Roadmap Call itself is free. For the VIP upgrade, we'd rather give back ${PLANS.bundle.priceLabel} than waste your time. This page explains exactly when and how refunds are processed.`}
+          subtitle={`We'd rather give back ${PLANS.call.priceLabel} than waste your time. This page explains exactly when and how refunds are processed.`}
           lastUpdated="February 2026"
         />
 
@@ -34,8 +34,8 @@ export default function RefundPage() {
               <p className="text-ink-800 text-[15px] leading-relaxed m-0">
                 <strong className="text-ink-950">Our promise:</strong> If you attend
                 the Roadmap Call and feel it didn't give you meaningful insight into
-                your sugar patterns, write to us and we'll refund your VIP upgrade
-                ({PLANS.bundle.priceLabel}) in full. No arguments, no pressure.
+                your sugar patterns, write to us and we'll refund your{' '}
+                {PLANS.call.priceLabel} in full. No arguments, no pressure.
               </p>
             </div>
 
@@ -55,9 +55,9 @@ export default function RefundPage() {
               .
             </p>
 
-            <h2>2. Refund Eligibility — VIP Upgrade ({PLANS.bundle.priceLabel})</h2>
+            <h2>2. Refund Eligibility — Roadmap Call ({PLANS.call.priceLabel})</h2>
             <p>
-              You are eligible for a full refund of the {PLANS.bundle.priceLabel} VIP upgrade
+              You are eligible for a full refund of the {PLANS.call.priceLabel} Roadmap Call
               fee if:
             </p>
             <ul>

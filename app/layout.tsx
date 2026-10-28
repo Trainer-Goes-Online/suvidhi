@@ -35,7 +35,7 @@ export const metadata: Metadata = {
     'Lose 5-15 Kilos & Reduce Mummy Belly · The 90-Day Postpartum Restore Programme',
   // Price + mechanism names come from config so the SEO description can never
   // drift from what the page itself renders.
-  description: `Book a free ${NAMING.call} with ${NAMING.clinician}, a UK-trained ${NAMING.clinicianTitle}. In 30 minutes she runs ${NAMING.mechanism} against your own reports and tells you which of the four reasons your body is still stuck applies to you.`,
+  description: `Book a ${PLANS.call.priceLabel} ${NAMING.call} with ${NAMING.clinician}, a UK-trained ${NAMING.clinicianTitle}. In 30 minutes she runs ${NAMING.mechanism} against your own reports and tells you which of the four reasons your body is still stuck applies to you.`,
   openGraph: {
     title: 'Lose 5-15 Kilos & Reduce Mummy Belly · Suvidhi Pandey',
     description:

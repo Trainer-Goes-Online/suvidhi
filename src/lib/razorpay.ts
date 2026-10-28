@@ -62,8 +62,6 @@ export interface CheckoutTracking {
   countryCode?: string
   amount?: number
   isTest?: boolean
-  /** Pabbly segregation field — see PurchaseType in src/lib/server/pabbly.ts. */
-  purchaseType?: 'call_only' | 'call_video_library'
   eventSourceUrl?: string
   fbc?: string
   fbp?: string
@@ -238,7 +236,6 @@ async function createOrder(input: {
         },
         fbclid: t?.fbclid ?? '',
         isTest: t?.isTest === true,
-        purchaseType: t?.purchaseType,
       }),
     })
     const data = (await r.json()) as Record<string, unknown>

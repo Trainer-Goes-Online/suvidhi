@@ -19,7 +19,6 @@ import { Footer } from '@/components/sections/Footer'
 import { ConfirmationStep } from '@/components/sections/ConfirmationStep'
 import { WhatsAppCta, buildWhatsAppUrl } from '@/components/ui/WhatsAppCta'
 import { getFunnelState } from '@/lib/funnelState'
-import { fireScheduleOnce } from '@/lib/metaClient'
 import { fadeUp, stagger, VIEWPORT_ONCE } from '@/lib/motion'
 import { appendUtm } from '@/lib/utm'
 import { NAMING, SKOOL, WHATSAPP, resolvePlan } from '@/lib/config'
@@ -42,18 +41,13 @@ const FourSystemCheck = dynamic(() =>
  * Everything below the hero exists to protect show-rate, not to sell: what the
  * call covers, how to turn up prepared, and proof that the decision was sound.
  * There are deliberately NO landing-page CTAs here — this visitor has already
- * booked, and pushing them back to /register would be nonsense.
+ * paid, and pushing them back to /oto would be nonsense.
  */
 
 interface FunnelState {
   plan?: string
   name?: string
-  firstName?: string
-  lastName?: string
   email?: string
-  phone?: string
-  city?: string
-  countryCode?: string
 }
 
 const PREP: { icon: typeof ClipboardList; title: string; desc: string }[] = [
@@ -85,27 +79,7 @@ export default function ThankYouPage() {
 
   useEffect(() => {
     window.scrollTo({ top: 0 })
-
-    // schedule_event fallback, for when Calendly is set to redirect here after
-    // booking. Only fires when Calendly's own redirect params are present (so
-    // a direct visit never counts as a booking), and shares the invitee-id
-    // dedup with the /confirmed embed callback — one booking, one event.
-    const q = new URLSearchParams(window.location.search)
-    const inviteeId = q.get('invitee_uuid') ?? ''
-    const inviteeEmail = q.get('invitee_email') ?? ''
-    if (!inviteeId && !inviteeEmail) return
-    fireScheduleOnce(
-      {
-        firstName: state.firstName ?? q.get('invitee_first_name') ?? undefined,
-        lastName: state.lastName ?? q.get('invitee_last_name') ?? undefined,
-        email: state.email || inviteeEmail,
-        phone: state.phone,
-        city: state.city,
-        countryCode: state.countryCode,
-      },
-      inviteeId,
-    )
-  }, [state])
+  }, [])
 
   return (
     // ConfirmationStep renders a fixed mobile CTA bar, so the clearance lives
