@@ -8,7 +8,7 @@ const ConfirmedPage = dynamic(() => import('@/views/ConfirmedPage'), {
   loading: () => <RouteFallback />,
 })
 
-/** Confirmation for the ₹97 call on its own — one step: book the slot. */
+/** Confirmation for the free call registration — one step: book the slot. */
 export default function Page() {
   return <ConfirmedPage plan="call" />
 }

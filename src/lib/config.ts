@@ -59,7 +59,7 @@ export const PROOF = {
 } as const
 
 // The paid 90-day programme. Quoted in ONE place only (FAQ Q.07) — it is not
-// sold on this page, the ₹97 call is.
+// sold on this page; the free Roadmap Call is.
 export const PROGRAMME = {
   startingPrice: num(process.env.NEXT_PUBLIC_PROGRAMME_START_INR, 14500),
   get startingPriceLabel(): string {
@@ -67,11 +67,11 @@ export const PROGRAMME = {
   },
 } as const
 
-// ─── The two things that can actually be bought here ─────────────────
+// ─── The two ways through /register ──────────────────────────────────
 //
-// PRICING MODEL: `bundle` is an ALL-IN price, not ₹97 + ₹497. Selecting the
-// bundle on /oto replaces the ₹97 line rather than adding to it. Flip
-// NEXT_PUBLIC_BUNDLE_PRICE_INR to 594 if it should ever become additive.
+// PRICING MODEL: the Roadmap Call is FREE — no payment, no Razorpay. The only
+// paid path is the VIP upgrade on /register, which adds the Video Library and
+// charges the bundle price (₹497) through Razorpay.
 export type PlanId = 'call' | 'bundle'
 
 export interface Plan {
@@ -87,7 +87,10 @@ export interface Plan {
   includes: readonly string[]
 }
 
-const CALL_PRICE = num(process.env.NEXT_PUBLIC_CALL_PRICE_INR, 97)
+// The call is free by design. Deliberately NOT read from
+// NEXT_PUBLIC_CALL_PRICE_INR any more, so a stale ₹97 left in an old .env can
+// never bring the payment back.
+const CALL_PRICE = 0
 const BUNDLE_PRICE = num(process.env.NEXT_PUBLIC_BUNDLE_PRICE_INR, 497)
 
 const CALL_INCLUDES = [
@@ -100,7 +103,7 @@ export const PLANS: Record<PlanId, Plan> = {
   call: {
     id: 'call',
     price: CALL_PRICE,
-    priceLabel: inr(CALL_PRICE),
+    priceLabel: 'Free',
     name: NAMING.call,
     shortName: 'Roadmap Call',
     includes: CALL_INCLUDES,

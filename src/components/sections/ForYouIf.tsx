@@ -56,7 +56,7 @@ export function ForYouIf() {
           className="flex flex-col items-center gap-4 text-center"
         >
           <span className="eyebrow text-balance">
-            For Mothers 3 To 24 Months Postpartum, In India And Abroad
+            For Mothers 3 Months To 5 Years Postpartum, In India And Abroad
           </span>
           <h2 className="h-section text-balance">
             This Is <span className="grad-text">For You If:</span>

@@ -111,6 +111,8 @@ export async function firePurchaseTracking(
     tasks.push(
       sendPabblyRow(pabblyUrl, {
         leadId: paymentId,
+        // Legacy 100%-off coupon path — no library was paid for.
+        purchaseType: 'call_only',
         createdAt: new Date().toISOString(),
         firstName: t.firstName ?? '',
         lastName: t.lastName ?? '',

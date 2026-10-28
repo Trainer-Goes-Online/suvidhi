@@ -3,12 +3,15 @@
 import dynamic from 'next/dynamic'
 import { RouteFallback } from '@/components/ui/RouteFallback'
 
-const LegacyFunnelRedirect = dynamic(() => import('@/views/LegacyFunnelRedirect'), {
+const ThankYouPage = dynamic(() => import('@/views/ThankYouPage'), {
   ssr: false,
   loading: () => <RouteFallback />,
 })
 
-// Retired route — see src/views/LegacyFunnelRedirect.tsx.
+/**
+ * Post-booking bridge. Reached from /confirmed and /confirmed-plus once
+ * Calendly reports the slot is scheduled.
+ */
 export default function Page() {
-  return <LegacyFunnelRedirect />
+  return <ThankYouPage />
 }

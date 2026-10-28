@@ -83,7 +83,7 @@ export async function POST(req: Request): Promise<Response> {
   // event_source_url is metadata (not a matching signal), so no data is lost.
   let esu = ''
   try {
-    esu = `${new URL(req.url).origin}/checkout`
+    esu = `${new URL(req.url).origin}/register`
   } catch {
     esu = ''
   }
@@ -116,6 +116,8 @@ export async function POST(req: Request): Promise<Response> {
     ua: trunc(ctx.clientUserAgent),
     esu: trunc(esu),
     tst: body.isTest === true ? '1' : '0',
+    // purchase_type for the Pabbly row the webhook writes on capture.
+    pt: body.purchaseType === 'call_only' ? 'call_only' : 'call_video_library',
   }
 
   try {

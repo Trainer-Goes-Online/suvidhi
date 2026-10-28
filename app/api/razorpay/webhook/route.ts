@@ -1,6 +1,6 @@
 import { createHmac, createHash, timingSafeEqual } from 'node:crypto'
 import { sendSalesEvent } from '@/lib/server/metaCapi'
-import { sendPabblyRow } from '@/lib/server/pabbly'
+import { isPurchaseType, sendPabblyRow } from '@/lib/server/pabbly'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -123,6 +123,9 @@ export async function POST(req: Request): Promise<Response> {
   const clientUserAgent = str(notes.ua)
   const eventSourceUrl = str(notes.esu)
   const fbclid = str(notes.clid)
+  // Stamped by create-order from the /register choice. The call itself is
+  // free, so any captured funnel payment without it is the VIP bundle.
+  const purchaseType = isPurchaseType(notes.pt) ? notes.pt : 'call_video_library'
 
   // 6) Server-derived fields
   const rawAmount = payment.amount
@@ -185,6 +188,7 @@ export async function POST(req: Request): Promise<Response> {
   if (pabblyUrl) {
     const r = await sendPabblyRow(pabblyUrl, {
       leadId: paymentId,
+      purchaseType,
       createdAt,
       firstName: cust.fn ?? '',
       lastName: cust.ln ?? '',

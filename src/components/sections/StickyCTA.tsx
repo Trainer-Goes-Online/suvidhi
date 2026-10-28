@@ -69,7 +69,7 @@ export function StickyCTA() {
                         {PLANS.call.priceLabel}
                       </span>
                       <span className="text-ink-500 text-[11.5px] sm:text-[12.5px] font-medium">
-                        to start
+                        1:1 with Suvidhi
                       </span>
                     </div>
                   </div>
@@ -79,7 +79,7 @@ export function StickyCTA() {
                 <motion.button
                   ref={btnRef}
                   onClick={() => {
-                    // Meta AddToCart + GA4 add_to_cart (once per browser).
+                    // Meta atc_event + GA4 add_to_cart (once per browser).
                     trackCheckoutCtaClick(CTA_DESTINATION)
                     router.push(CTA_DESTINATION + utmQueryString())
                   }}

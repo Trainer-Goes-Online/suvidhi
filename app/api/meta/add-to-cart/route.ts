@@ -1,8 +1,4 @@
-import {
-  sendAddToCartEvent,
-  isTrackingEnabled,
-  metaCreds,
-} from '@/lib/server/metaEvents'
+import { sendAtcEvent, isTrackingEnabled, metaCreds } from '@/lib/server/metaEvents'
 import { getClientContext } from '@/lib/server/requestContext'
 
 export const runtime = 'nodejs'
@@ -15,12 +11,18 @@ function json(status: number, body: unknown): Response {
   })
 }
 
+function str(v: unknown): string | undefined {
+  return typeof v === 'string' && v ? v : undefined
+}
+
 /**
- * Fires Meta `AddToCart` — triggered by the first landing-CTA click of a
+ * Fires the custom `atc_event` — triggered by the first landing-CTA click of a
  * browser's lifetime (client dedups via localStorage; Meta dedups on event_id).
  *
- * Reads _fbc/_fbp from cookies and IP/UA from headers — the only matching
- * signals that exist at CTA-click time (no PII yet). Never fails the click.
+ * _fbc/_fbp come from the request cookies, falling back to the values the
+ * browser sent (an fbc rebuilt from fbclid exists before Meta's pixel sets the
+ * cookie). IP/UA from headers, hashed identity from the svd_mam cookie.
+ * Never fails the click.
  */
 export async function POST(req: Request): Promise<Response> {
   let body: Record<string, unknown> = {}
@@ -36,29 +38,17 @@ export async function POST(req: Request): Promise<Response> {
 
   const creds = metaCreds()
   if (!creds) {
-    console.log('[atc] skipped: env_missing')
+    console.log('[atc_event] skipped: env_missing')
     return json(200, { ok: true, skipped: 'env_missing' })
   }
 
-  const ctx = getClientContext(req)
-  const eventSourceUrl =
-    typeof body.eventSourceUrl === 'string' ? body.eventSourceUrl : undefined
-
-  const result = await sendAddToCartEvent({
-    pixelId: creds.pixelId,
-    accessToken: creds.accessToken,
-    testEventCode: creds.testEventCode,
-    fbc: ctx.fbc,
-    fbp: ctx.fbp,
-    clientIp: ctx.clientIp,
-    clientUserAgent: ctx.clientUserAgent,
-    eventSourceUrl,
-  })
+  const ctx = getClientContext(req, { fbc: str(body.fbc), fbp: str(body.fbp) })
+  const result = await sendAtcEvent(creds, ctx, str(body.eventSourceUrl))
 
   if (result.ok) {
-    console.log('[atc] AddToCart sent')
+    console.log('[atc_event] sent')
     return json(200, { ok: true, capi: 'sent' })
   }
-  console.error('[atc] AddToCart failed', result.status, result.body.slice(0, 300))
+  console.error('[atc_event] failed', result.status, result.body.slice(0, 300))
   return json(200, { ok: true, capi: 'error' })
 }

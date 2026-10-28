@@ -1,20 +1,26 @@
 /**
- * Server-side Meta CAPI — the two UPPER-funnel intent events.
+ * Server-side Meta CAPI — the three upper-funnel CUSTOM events.
  *
- *   • AddToCart        — landing-page CTA click (no PII available yet)
- *   • InitiateCheckout — checkout Pay click on a validated form (full 11 signals)
+ *   • atc_event      — landing-page CTA click (heads to /register)
+ *   • ic_event       — /register submitted: the free booking, or the VIP
+ *                      upgrade right before Razorpay opens
+ *   • schedule_event — Calendly reports the Roadmap Call is booked
  *
- * These are STANDARD Meta event names: this dataset is NOT in a restricted
- * (Health & Wellness) category, so standard names + full hashed PII are allowed.
- * The bottom-of-funnel conversion event stays exactly as it is (custom `sales`
- * in metaCapi.ts) — deliberately unchanged.
+ * Custom names, not AddToCart / InitiateCheckout / Schedule: this is a
+ * postpartum funnel, and custom events keep it clear of Meta's Health &
+ * Wellness restrictions on standard event names (same posture as the `sales`
+ * conversion event in metaCapi.ts, which is unchanged).
  *
- * Fired from our own API routes, triggered by a browser action. Completely
- * independent of the Razorpay webhook (which owns the conversion event).
+ * EMQ: every event carries every signal available at that moment —
+ * em/ph/fn/ln/ct/country/external_id (hashed), plus fbc/fbp/IP/UA (raw).
+ * When the form values are not in hand, the hashed identity from the
+ * first-party `svd_mam` cookie fills the gap (see requestContext.ts).
+ *
  * The browser still fires PageView only — no fbq('track') for these.
  */
 
 import crypto from 'node:crypto'
+import type { ClientContext } from './requestContext'
 
 const GRAPH_API_VERSION_DEFAULT = 'v25.0'
 
@@ -23,24 +29,18 @@ function sha256(value: string): string {
 }
 
 /**
- * The funnel-entry price (₹97 call). AddToCart and InitiateCheckout both fire
- * BEFORE the buyer commits to a plan on /oto, so the call price — not the
- * bundle price — is the correct value to report on those events.
- *
- * Kept as its own reader (rather than importing src/lib/config) because that
- * module is client-side and Next only inlines NEXT_PUBLIC_* for the browser
- * bundle; on the server we read process.env directly.
+ * The VIP upgrade price — the only paid thing in the funnel now that the
+ * Roadmap Call is free. Read from process.env directly because src/lib/config
+ * is client-side; the 497 fallback matches PLANS.bundle there.
  */
-function entryPrice(): number {
-  const price = Number(process.env.NEXT_PUBLIC_CALL_PRICE_INR ?? '')
-  // Falls back to the same 97 default as PLANS.call in src/lib/config.ts, so an
-  // unset env var behaves identically on the server and in the browser.
-  return Number.isFinite(price) && price > 0 ? price : 97
+export function vipPrice(): number {
+  const price = Number(process.env.NEXT_PUBLIC_BUNDLE_PRICE_INR ?? '')
+  return Number.isFinite(price) && price > 0 ? price : 497
 }
 
-/** Test-mode gate — mirrors the funnel's `plan.price <= 1` convention. */
+/** Test-mode gate — mirrors the funnel's `price <= 1` convention. */
 export function isTrackingEnabled(): boolean {
-  return entryPrice() > 1
+  return vipPrice() > 1
 }
 
 export function metaCreds(): { pixelId: string; accessToken: string; testEventCode?: string } | null {
@@ -54,16 +54,6 @@ export function metaCreds(): { pixelId: string; accessToken: string; testEventCo
     accessToken,
     testEventCode: raw && raw !== '0' ? raw : undefined,
   }
-}
-
-function offerValue(): number {
-  return entryPrice()
-}
-
-/** The all-in bundle price (₹497) — reported on the `call_plus_course` event. */
-function bundlePrice(): number {
-  const p = Number(process.env.NEXT_PUBLIC_BUNDLE_PRICE_INR ?? '')
-  return Number.isFinite(p) && p > 0 ? p : 497
 }
 
 function contentBlock() {
@@ -84,14 +74,16 @@ export interface CapiResult {
 }
 
 async function postToMeta(
-  pixelId: string,
-  accessToken: string,
-  payload: Record<string, unknown>,
+  creds: { pixelId: string; accessToken: string; testEventCode?: string },
+  event: Record<string, unknown>,
 ): Promise<CapiResult> {
+  const payload: Record<string, unknown> = { data: [event] }
+  if (creds.testEventCode) payload.test_event_code = creds.testEventCode
+
   const apiVersion = process.env.META_GRAPH_API_VERSION || GRAPH_API_VERSION_DEFAULT
   const url =
-    `https://graph.facebook.com/${apiVersion}/${pixelId}/events` +
-    `?access_token=${encodeURIComponent(accessToken)}`
+    `https://graph.facebook.com/${apiVersion}/${creds.pixelId}/events` +
+    `?access_token=${encodeURIComponent(creds.accessToken)}`
   try {
     const res = await fetch(url, {
       method: 'POST',
@@ -106,174 +98,154 @@ async function postToMeta(
 }
 
 // ─────────────────────────────────────────────────────────────────────
-// AddToCart — no PII exists at CTA-click time. Expected EMQ ~3–5.
+// user_data — raw identity wins, the hashed cookie fills whatever is missing
 // ─────────────────────────────────────────────────────────────────────
 
-export interface AddToCartInput {
-  pixelId: string
-  accessToken: string
-  testEventCode?: string
-  fbc?: string
-  fbp?: string
-  clientIp?: string
-  clientUserAgent?: string
-  eventSourceUrl?: string
-}
-
-export async function sendAddToCartEvent(input: AddToCartInput): Promise<CapiResult> {
-  const userData: Record<string, unknown> = {}
-  if (input.fbc) userData.fbc = input.fbc
-  if (input.fbp) userData.fbp = input.fbp
-  if (input.clientIp) userData.client_ip_address = input.clientIp
-  if (input.clientUserAgent) userData.client_user_agent = input.clientUserAgent
-
-  // Deterministic per browser so Meta collapses accidental duplicates (48h).
-  const eventId = input.fbp
-    ? sha256(`${input.fbp}|atc`)
-    : `${crypto.randomBytes(8).toString('hex')}_atc`
-
-  const event: Record<string, unknown> = {
-    event_name: 'AddToCart',
-    event_time: Math.floor(Date.now() / 1000),
-    event_id: eventId,
-    action_source: 'website',
-    user_data: userData,
-    custom_data: {
-      currency: 'INR',
-      value: offerValue(),
-      ...contentBlock(),
-    },
-  }
-  if (input.eventSourceUrl) event.event_source_url = input.eventSourceUrl
-
-  const payload: Record<string, unknown> = { data: [event] }
-  if (input.testEventCode) payload.test_event_code = input.testEventCode
-
-  return postToMeta(input.pixelId, input.accessToken, payload)
-}
-
-// ─────────────────────────────────────────────────────────────────────
-// OTO plan choice — custom events fired when the buyer clicks Continue on /oto.
-//   plan 'call'   → `only_call`        (value = ₹97 call price)
-//   plan 'bundle' → `call_plus_course` (value = ₹497 all-in bundle price)
-// No PII exists yet (the form is on /checkout), so EMQ ~3–5, like AddToCart.
-// ─────────────────────────────────────────────────────────────────────
-
-export interface OtoChoiceInput {
-  pixelId: string
-  accessToken: string
-  testEventCode?: string
-  plan: 'call' | 'bundle'
-  fbc?: string
-  fbp?: string
-  clientIp?: string
-  clientUserAgent?: string
-  eventSourceUrl?: string
-}
-
-export async function sendOtoChoiceEvent(input: OtoChoiceInput): Promise<CapiResult> {
-  const eventName = input.plan === 'bundle' ? 'call_plus_course' : 'only_call'
-  const value = input.plan === 'bundle' ? bundlePrice() : entryPrice()
-
-  const userData: Record<string, unknown> = {}
-  if (input.fbc) userData.fbc = input.fbc
-  if (input.fbp) userData.fbp = input.fbp
-  if (input.clientIp) userData.client_ip_address = input.clientIp
-  if (input.clientUserAgent) userData.client_user_agent = input.clientUserAgent
-
-  const eventId = input.fbp
-    ? sha256(`${input.fbp}|${eventName}`)
-    : `${crypto.randomBytes(8).toString('hex')}_${eventName}`
-
-  const event: Record<string, unknown> = {
-    event_name: eventName,
-    event_time: Math.floor(Date.now() / 1000),
-    event_id: eventId,
-    action_source: 'website',
-    user_data: userData,
-    custom_data: {
-      currency: 'INR',
-      value,
-      ...contentBlock(),
-    },
-  }
-  if (input.eventSourceUrl) event.event_source_url = input.eventSourceUrl
-
-  const payload: Record<string, unknown> = { data: [event] }
-  if (input.testEventCode) payload.test_event_code = input.testEventCode
-
-  return postToMeta(input.pixelId, input.accessToken, payload)
-}
-
-// ─────────────────────────────────────────────────────────────────────
-// InitiateCheckout — full 11 signals. Expected EMQ 9+.
-// ─────────────────────────────────────────────────────────────────────
-
-export interface InitiateCheckoutInput {
-  pixelId: string
-  accessToken: string
-  testEventCode?: string
-  email: string
+export interface RawIdentity {
+  email?: string
   phone?: string
   firstName?: string
   lastName?: string
   city?: string
   /** 2-letter ISO. */
   countryCode?: string
-  fbc?: string
-  fbp?: string
-  clientIp?: string
-  clientUserAgent?: string
-  eventSourceUrl?: string
-  /** Rupees (major units). */
-  value?: number
 }
 
-export async function sendInitiateCheckoutEvent(
-  input: InitiateCheckoutInput,
-): Promise<CapiResult> {
-  const email = input.email.trim().toLowerCase()
-  const hashedEmail = email ? sha256(email) : undefined
-  const phoneDigits = (input.phone ?? '').replace(/\D/g, '')
-  const fn = (input.firstName ?? '').trim().toLowerCase()
-  const ln = (input.lastName ?? '').trim().toLowerCase()
-  const ct = (input.city ?? '').trim().toLowerCase().replace(/[^a-z]/g, '')
-  const country = (input.countryCode ?? '').trim().toLowerCase()
+/**
+ * Normalises + hashes per Meta's spec. Phone is digits-only WITH the country
+ * code (E.164 minus the "+"), which is what react-phone-number-input yields.
+ * external_id = sha256(email) everywhere — the same derivation as the `sales`
+ * event, the browser MAM cookie and the Pabbly row, so Meta resolves one
+ * person across every event.
+ */
+function buildUserData(raw: RawIdentity, ctx: ClientContext): Record<string, unknown> {
+  const hashed: Record<string, string> = { ...ctx.hashedIdentity }
+
+  const email = (raw.email ?? '').trim().toLowerCase()
+  const phone = (raw.phone ?? '').replace(/\D/g, '')
+  const fn = (raw.firstName ?? '').trim().toLowerCase()
+  const ln = (raw.lastName ?? '').trim().toLowerCase()
+  const ct = (raw.city ?? '').trim().toLowerCase().replace(/[^a-z]/g, '')
+  const country = (raw.countryCode ?? '').trim().toLowerCase()
+
+  if (email) {
+    hashed.em = sha256(email)
+    hashed.external_id = hashed.em
+  }
+  if (phone) hashed.ph = sha256(phone)
+  if (fn) hashed.fn = sha256(fn)
+  if (ln) hashed.ln = sha256(ln)
+  if (ct) hashed.ct = sha256(ct)
+  if (country) hashed.country = sha256(country)
 
   const userData: Record<string, unknown> = {}
-  if (hashedEmail) {
-    userData.em = [hashedEmail]
-    // Same derivation as the `sales` conversion event + browser MAM cookie, so
-    // Meta resolves one stable identity across every event we send.
-    userData.external_id = [hashedEmail]
-  }
-  if (phoneDigits) userData.ph = [sha256(phoneDigits)]
-  if (fn) userData.fn = [sha256(fn)]
-  if (ln) userData.ln = [sha256(ln)]
-  if (ct) userData.ct = [sha256(ct)]
-  if (country) userData.country = [sha256(country)]
-  if (input.fbc) userData.fbc = input.fbc
-  if (input.fbp) userData.fbp = input.fbp
-  if (input.clientIp) userData.client_ip_address = input.clientIp
-  if (input.clientUserAgent) userData.client_user_agent = input.clientUserAgent
+  for (const [k, v] of Object.entries(hashed)) userData[k] = [v]
+  if (ctx.fbc) userData.fbc = ctx.fbc
+  if (ctx.fbp) userData.fbp = ctx.fbp
+  if (ctx.clientIp) userData.client_ip_address = ctx.clientIp
+  if (ctx.clientUserAgent) userData.client_user_agent = ctx.clientUserAgent
+  return userData
+}
 
+function customData(value: number): Record<string, unknown> {
+  return { currency: 'INR', value, ...contentBlock() }
+}
+
+function baseEvent(
+  name: string,
+  eventId: string,
+  userData: Record<string, unknown>,
+  data: Record<string, unknown>,
+  eventSourceUrl?: string,
+): Record<string, unknown> {
   const event: Record<string, unknown> = {
-    event_name: 'InitiateCheckout',
+    event_name: name,
     event_time: Math.floor(Date.now() / 1000),
-    // Same real user → same event_id, even across devices/sessions.
-    event_id: sha256(`${email}|ic`),
+    event_id: eventId,
     action_source: 'website',
     user_data: userData,
-    custom_data: {
-      currency: 'INR',
-      value: typeof input.value === 'number' && input.value > 0 ? input.value : offerValue(),
-      ...contentBlock(),
-    },
+    custom_data: data,
   }
-  if (input.eventSourceUrl) event.event_source_url = input.eventSourceUrl
+  if (eventSourceUrl) event.event_source_url = eventSourceUrl
+  return event
+}
 
-  const payload: Record<string, unknown> = { data: [event] }
-  if (input.testEventCode) payload.test_event_code = input.testEventCode
+type Creds = NonNullable<ReturnType<typeof metaCreds>>
 
-  return postToMeta(input.pixelId, input.accessToken, payload)
+// ─────────────────────────────────────────────────────────────────────
+// atc_event — landing CTA click. No form yet, so EMQ leans on fbc/fbp/IP/UA,
+// plus the hashed cookie identity for anyone who has registered before.
+// ─────────────────────────────────────────────────────────────────────
+
+export async function sendAtcEvent(
+  creds: Creds,
+  ctx: ClientContext,
+  eventSourceUrl?: string,
+): Promise<CapiResult> {
+  // Deterministic per browser so Meta collapses accidental duplicates (48h).
+  const eventId = ctx.fbp
+    ? sha256(`${ctx.fbp}|atc_event`)
+    : `${crypto.randomBytes(8).toString('hex')}_atc_event`
+  const event = baseEvent(
+    'atc_event',
+    eventId,
+    buildUserData({}, ctx),
+    customData(0),
+    eventSourceUrl,
+  )
+  return postToMeta(creds, event)
+}
+
+// ─────────────────────────────────────────────────────────────────────
+// ic_event — /register submitted on a valid form. Full identity in hand.
+// ─────────────────────────────────────────────────────────────────────
+
+export async function sendIcEvent(
+  creds: Creds,
+  ctx: ClientContext,
+  identity: RawIdentity,
+  vip: boolean,
+  eventSourceUrl?: string,
+): Promise<CapiResult> {
+  const email = (identity.email ?? '').trim().toLowerCase()
+  // Same person + same path → same event_id, even across devices. Free and
+  // VIP are different intents, so each gets its own id.
+  const eventId = sha256(`${email}|ic_event|${vip ? 'vip' : 'free'}`)
+  const event = baseEvent(
+    'ic_event',
+    eventId,
+    buildUserData(identity, ctx),
+    // Value is set server-side from the path, never trusted from the browser.
+    customData(vip ? vipPrice() : 0),
+    eventSourceUrl,
+  )
+  return postToMeta(creds, event)
+}
+
+// ─────────────────────────────────────────────────────────────────────
+// schedule_event — Calendly booking confirmed. Identity comes from the
+// /register hand-off, with the hashed cookie as a fallback.
+// ─────────────────────────────────────────────────────────────────────
+
+export async function sendScheduleEvent(
+  creds: Creds,
+  ctx: ClientContext,
+  identity: RawIdentity,
+  /** Calendly invitee UUID — one booking, one event, however it reaches us. */
+  inviteeId: string,
+  eventSourceUrl?: string,
+): Promise<CapiResult> {
+  const email = (identity.email ?? '').trim().toLowerCase()
+  const eventId = inviteeId
+    ? sha256(`schedule_event|${inviteeId}`)
+    : sha256(`${email || ctx.hashedIdentity.em || ctx.fbp}|schedule_event`)
+  const event = baseEvent(
+    'schedule_event',
+    eventId,
+    buildUserData(identity, ctx),
+    // Zero: any VIP money is already reported by the `sales` event.
+    customData(0),
+    eventSourceUrl,
+  )
+  return postToMeta(creds, event)
 }
