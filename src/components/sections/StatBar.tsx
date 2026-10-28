@@ -15,7 +15,7 @@ const STATS = [
   { value: PROOF.mothers, label: 'Mothers Coached Globally' },
   { value: PROOF.avgRecoveryWeeks, label: 'Avg. Recovery Time' },
   { value: `${PROOF.rating}★`, label: 'Client Rating' },
-  { value: PLANS.call.priceLabel, label: 'Roadmap Call' },
+  { value: PLANS.call.priceLabel, label: '30-min 1:1 Call' },
 ]
 
 export function StatBar() {

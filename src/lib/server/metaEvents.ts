@@ -31,11 +31,15 @@ function sha256(value: string): string {
 /**
  * The VIP upgrade price — the only paid thing in the funnel now that the
  * Roadmap Call is free. Read from process.env directly because src/lib/config
- * is client-side; the 497 fallback matches PLANS.bundle there.
+ * is client-side; the 9.99 / AED fallbacks match PLANS.bundle / OFFER there.
  */
 export function vipPrice(): number {
-  const price = Number(process.env.NEXT_PUBLIC_BUNDLE_PRICE_INR ?? '')
-  return Number.isFinite(price) && price > 0 ? price : 497
+  const price = Number(process.env.NEXT_PUBLIC_ADDON_PRICE ?? '')
+  return Number.isFinite(price) && price > 0 ? price : 9.99
+}
+
+export function offerCurrency(): string {
+  return (process.env.NEXT_PUBLIC_OFFER_CURRENCY || 'AED').toUpperCase()
 }
 
 /** Test-mode gate — mirrors the funnel's `price <= 1` convention. */
@@ -148,7 +152,7 @@ function buildUserData(raw: RawIdentity, ctx: ClientContext): Record<string, unk
 }
 
 function customData(value: number): Record<string, unknown> {
-  return { currency: 'INR', value, ...contentBlock() }
+  return { currency: offerCurrency(), value, ...contentBlock() }
 }
 
 function baseEvent(

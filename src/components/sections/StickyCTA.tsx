@@ -69,7 +69,7 @@ export function StickyCTA() {
                         {PLANS.call.priceLabel}
                       </span>
                       <span className="text-ink-500 text-[11.5px] sm:text-[12.5px] font-medium">
-                        1:1 with Suvidhi
+                        30-min 1:1 call with Suvidhi
                       </span>
                     </div>
                   </div>

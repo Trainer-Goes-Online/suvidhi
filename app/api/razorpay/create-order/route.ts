@@ -1,5 +1,6 @@
 import Razorpay from 'razorpay'
 import { getClientContext } from '@/lib/server/requestContext'
+import { offerCurrency } from '@/lib/server/metaEvents'
 
 // Razorpay's Node SDK is server-only — keep this handler on the Node runtime
 // and never statically cached.
@@ -65,7 +66,7 @@ export async function POST(req: Request): Promise<Response> {
     typeof body.amount === 'number' && body.amount > 0 ? (body.amount as number) : 0
   if (amountRupees <= 0) {
     return json(400, {
-      error: 'amount must be > 0 (in INR major units)',
+      error: 'amount must be > 0 (in major units of the offer currency)',
       code: 'INVALID_AMOUNT',
     })
   }
@@ -123,7 +124,7 @@ export async function POST(req: Request): Promise<Response> {
   try {
     const order = await rp.orders.create({
       amount: Math.round(amountRupees * 100), // paise
-      currency: (body.currency as string) ?? 'INR',
+      currency: (body.currency as string) ?? offerCurrency(),
       receipt: body.receipt as string | undefined,
       notes,
     })

@@ -12,6 +12,7 @@ import crypto from 'node:crypto'
 import { sendSalesEvent, hostOnlyUrl } from './metaCapi'
 import { sendPabblyRow } from './pabbly'
 import { getClientContext } from './requestContext'
+import { offerCurrency } from './metaEvents'
 
 export interface TrackingPayload {
   firstName?: string
@@ -55,7 +56,7 @@ export async function firePurchaseTracking(
   fireCapi: boolean,
 ): Promise<void> {
   const ctx = getClientContext(req, { fbc: t.fbc, fbp: t.fbp })
-  const currency = 'INR'
+  const currency = offerCurrency()
   const amount = typeof t.amount === 'number' ? t.amount : 0
   const isTest = !!t.isTest
 

@@ -42,7 +42,7 @@ import { fireInitiateCheckoutOnce } from '@/lib/metaClient'
  * /register — the free Roadmap Call booking form, with ONE optional upsell.
  *
  *   Free path → form → ic_event → Pabbly row → /confirmed (book the slot).
- *   VIP path  → form + upgrade ticked → ic_event → Razorpay (₹497)
+ *   VIP path  → form + upgrade ticked → ic_event → Razorpay (AED 9.99 default)
  *               → /confirmed-plus (book the slot, community, course access).
  *
  * The VIP box sits between the form and the button on purpose: it is the last

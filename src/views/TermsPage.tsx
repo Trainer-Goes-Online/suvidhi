@@ -60,7 +60,7 @@ export default function TermsPage() {
 
             <h2>4. Pricing and Payments</h2>
             <p>
-              All prices are listed in Indian Rupees (INR) and are inclusive of
+              All prices are listed in the currency shown at checkout and are inclusive of
               applicable taxes unless explicitly stated otherwise. We may revise
               pricing, discounts, or promotional offers at any time without prior
               notice; the price applicable to your order is the price displayed at the
